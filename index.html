@@ -80,20 +80,9 @@
     <link rel="stylesheet" href="./public/css/index.css" />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-    />
     <script src="./src/js/jquery-3.7.1.min.js"></script>
-    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   </head>
   <body class="">
     <nav class="main-menu">
@@ -105,49 +94,42 @@
         <ul>
           <li class="nav-item active">
             <a href="#">
-              <i class="fa fa-user nav-icon"></i>
-              <span class="nav-text">Profile</span>
+              <i class="bx bxs-home nav-icon"></i>
+              <span class="nav-text">Главная</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#">
-              <i class="fa fa-map nav-icon"></i>
-              <span class="nav-text">Discover</span>
+              <i class="bx bxs-car nav-icon"></i>
+              <span class="nav-text">Автопарк</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#">
-              <i class="fa fa-arrow-trend-up nav-icon"></i>
-              <span class="nav-text">Trending</span>
+              <i class="bx bxs-directions nav-icon"></i>
+              <span class="nav-text">О трансферах</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#">
-              <i class="fa-solid fa-chart-simple nav-icon"></i>
-              <span class="nav-text">Analytics</span>
+              <i class="bx bxs-package nav-icon"></i>
+              <span class="nav-text">О посылках</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#">
-              <i class="fa fa-heart nav-icon"></i>
-              <span class="nav-text">Favorites</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="#">
-              <i class="fa-solid fa-pen-to-square nav-icon"></i>
-              <span class="nav-text">Reviews</span>
+              <i class="bx bx-money nav-icon"></i>
+              <span class="nav-text">О переводах</span>
             </a>
           </li>
         </ul>
       </div>
 
-      <ul>
+      <!-- <ul> 
         <li class="nav-item">
           <a href="#">
             <i class="fa fa-gear nav-icon"></i>
@@ -161,7 +143,7 @@
             <span class="nav-text">Logout</span>
           </a>
         </li>
-      </ul>
+      </ul> -->
     </nav>
 
     <section class="content">
@@ -172,8 +154,6 @@
             <i class="bx bx-search"></i>
           </form>
           <div class="interaction-control-mobile interactions">
-            <i class="fa-regular fa-envelope notified"></i>
-            <i class="fa-regular fa-bell notified"></i>
             <div class="toggle" onclick="switchTheme()">
               <div class="mode-icon moon">
                 <i class="bx bxs-moon"></i>
@@ -183,44 +163,6 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="header">
-          <picture class="morning-img hidden">
-            <img
-              class="header-mobile"
-              src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/b4f4845f-4dc7-4470-b81a-677f46f211c2"
-              alt=""
-            />
-            <img
-              class="header-tablet"
-              src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/8add6e87-577d-44cb-a7bb-18f0e4bd2163"
-              alt=""
-            />
-            <img
-              class="header-desktop"
-              src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/cce4084a-01a4-428d-961f-935bafe7a6e3"
-              alt=""
-            />
-          </picture>
-
-          <picture class="night-img">
-            <img
-              class="header-mobile"
-              src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/e349d3c2-ee2c-4982-866e-776236508fc9"
-              alt=""
-            />
-            <img
-              class="header-tablet"
-              src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/1266c923-a1d3-441a-bbb6-2dc6663b1f8b"
-              alt=""
-            />
-            <img
-              class="header-desktop"
-              src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/91011799-2b47-457d-9e11-65fe38a105d0"
-              alt=""
-            />
-          </picture>
         </div>
 
         <div class="upcoming-events">
@@ -589,8 +531,6 @@
 
       <div class="right-content">
         <div class="interaction-control interactions">
-          <i class="fa-regular fa-envelope notified"></i>
-          <i class="fa-regular fa-bell notified"></i>
           <div class="toggle" onclick="switchTheme()">
             <div class="mode-icon moon">
               <i class="bx bxs-moon"></i>
@@ -602,111 +542,91 @@
         </div>
 
         <div class="analytics">
-          <h1>Analytics</h1>
+          <h1>Актуальный курс</h1>
           <div class="analytics-container">
             <div class="total-events">
-              <div class="event-number card">
-                <h2>Past Events</h2>
-                <p>20</p>
-                <i class="bx bx-check-circle"></i>
+              <div id="dollar" class="event-number card">
+                <div class="grid">
+                  <h2>Покупка</h2>
+                  <p id="buy-dollar">0</p>
+                </div>
+                <div class="grid">
+                  <h2>Продажа</h2>
+                  <p id="sell-dollar">0</p>
+                </div>
+                <i class="bx bx-dollar"></i>
               </div>
-              <div class="event-number card">
-                <h2>Upcoming Events</h2>
-                <p>3</p>
-                <i class="bx bx-timer"></i>
+              <div id="euro" class="event-number card">
+                <div class="grid">
+                  <h2>Покупка</h2>
+                  <p id="buy-euro">0</p>
+                </div>
+                <div class="grid">
+                  <h2>Продажа</h2>
+                  <p id="sell-euro">0</p>
+                </div>
+                <i class="bx bx-euro"></i>
               </div>
-            </div>
-
-            <div class="chart" id="doughnut-chart">
-              <h2>Distribution of Attended Events</h2>
-              <canvas id="doughnut"></canvas>
-              <ul></ul>
+              <div id="pln" class="event-number card">
+                <div class="grid">
+                  <h2>Покупка</h2>
+                  <p id="buy-pln">0</p>
+                </div>
+                <div class="grid">
+                  <h2>Продажа</h2>
+                  <p id="sell-pln">0</p>
+                </div>
+                <svg viewBox="0 0 425.409 425.409">
+                  <polygon
+                    points="356.498,254.317 342.816,216.729 314.683,226.969 314.683,0 274.683,0 274.683,241.528 232.867,256.748 246.549,294.336 274.683,284.096 274.683,425.409 314.683,425.409 314.683,269.537 "
+                  ></polygon>
+                  <polygon
+                    points="255.204,120.57 255.204,85.656 68.911,85.656 68.911,125.656 207.405,125.656 68.911,390.496 68.911,425.409 255.204,425.409 255.204,385.409 116.71,385.409 "
+                  ></polygon>
+                </svg>
+              </div>
+              <div id="sek" class="event-number card">
+                <div class="grid">
+                  <h2>Покупка</h2>
+                  <p id="buy-sek">0</p>
+                </div>
+                <div class="grid">
+                  <h2>Продажа</h2>
+                  <p id="sell-sek">00.00</p>
+                </div>
+                <svg viewBox="0 0 122.88 95.78">
+                  <path
+                    d="M18,58.35l8.19-10.46L45.45,27H66.63L39.32,56.82l29,39H46.63L26.82,67.89l-8.06,6.47V95.78H0V0H18.76V42.72l-1,15.63Zm98.52-32.64a31,31,0,0,1,6.34.55l-1.41,17.6a22,22,0,0,0-5.54-.61q-9,0-14,4.62t-5,12.92v35H78.16V27H92.38l2.75,11.59h.93a26.15,26.15,0,0,1,8.65-9.32,21.27,21.27,0,0,1,11.83-3.53Z"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="contacts">
-          <h1>Contacts</h1>
+          <h1>Штат</h1>
           <div class="contacts-container">
             <div class="contact-status">
               <div class="contact-activity">
-                <img
-                  src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/e56800db-687d-4d0e-a470-51e37a4431c7"
-                  alt=""
-                />
-                <p>Matt favored <span>Jazz Fusion Night</span></p>
+                <img src="./src/assets/no-image.jpeg" alt="Евгений" />
+                <p>
+                  Евгений - основатель компании.
+                  <a href="https://t.me/TipTopDriver" target="_blank"
+                    >Telegram</a
+                  >
+                </p>
               </div>
-              <small>1 hour ago</small>
             </div>
 
             <div class="contact-status">
               <div class="contact-activity">
-                <img
-                  src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/fac9f27b-c1ea-4bba-973f-88996322fa2d"
-                  alt=""
-                />
+                <img src="./src/assets/no-image.jpeg" alt="Daniel Abros" />
                 <p>
-                  Bella bought a ticket for
-                  <span>Acoustic Serenade Under the Stars</span>
+                  Даниил - веб разработчик.
+                  <a href="https://abros.dev">Сайт</a>
                 </p>
               </div>
-              <small>4 hours ago</small>
-            </div>
-
-            <div class="contact-status">
-              <div class="contact-activity">
-                <img
-                  src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/1499d73c-ccc0-41a1-b530-1d629012aebd"
-                  alt=""
-                />
-                <p>
-                  Lucas bought a ticket for
-                  <span>Wimbledon Championships - 2024</span>
-                </p>
-              </div>
-              <small>1 day ago</small>
-            </div>
-
-            <div class="contact-status">
-              <div class="contact-activity">
-                <img
-                  src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/949768d4-0196-486c-b386-edb47ddd54c2"
-                  alt=""
-                />
-                <p>
-                  Sophia favored
-                  <span>Clay Sculpting Class</span>
-                </p>
-              </div>
-              <small>1 day ago</small>
-            </div>
-
-            <div class="contact-status">
-              <div class="contact-activity">
-                <img
-                  src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/8a470b8b-b5cf-4189-b36e-f22551997ff4"
-                  alt=""
-                />
-                <p>
-                  Kate bought a ticket for
-                  <span>Latin Rhythms Fusion</span>
-                </p>
-              </div>
-              <small>3 day ago</small>
-            </div>
-
-            <div class="contact-status">
-              <div class="contact-activity">
-                <img
-                  src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/7740acc0-3f86-4c28-8a8c-5ae67c343edb"
-                  alt=""
-                />
-                <p>
-                  Ben favored
-                  <span>Harry Potter Film Concert Series</span>
-                </p>
-              </div>
-              <small>6 day ago</small>
             </div>
           </div>
         </div>
