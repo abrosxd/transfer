@@ -132,7 +132,7 @@ function getCurrencyRates(currentRates, currencyCode, today) {
       rate.currency.isoCode === currencyCode &&
       rate.updateDate.startsWith(today)
   );
-  return rate ? { buy: rate.bid, sell: rate.ask } : { buy: 0, sell: 0 };
+  return rate ? { buy: rate.ask, sell: rate.bid } : { buy: 0, sell: 0 };
 }
 
 function updateRates(currentRates) {
