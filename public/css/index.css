@@ -506,6 +506,12 @@ body {
   margin-bottom: 24px;
 }
 
+.analytics-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 /* Total Events */
 
 .total-events {
@@ -522,6 +528,7 @@ body {
   width: 100%;
   padding: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .event-number h2 {
@@ -549,6 +556,15 @@ body {
   padding: 5px;
   fill: var(--primary-color);
   transition: all 0.2s ease-in-out;
+}
+
+.event-number .currency {
+  position: absolute;
+  left: 10px;
+  bottom: 12px;
+  font-size: small;
+  width: 85px;
+  line-height: 12px;
 }
 
 /* CONTACTS */
