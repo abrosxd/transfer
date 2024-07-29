@@ -24,13 +24,9 @@ function switchTheme() {
   if (document.body.classList.contains("darkmode")) {
     sunIcon.classList.remove("hidden");
     moonIcon.classList.add("hidden");
-    morningImage.classList.add("hidden");
-    nightImage.classList.remove("hidden");
   } else {
     sunIcon.classList.add("hidden");
     moonIcon.classList.remove("hidden");
-    morningImage.classList.remove("hidden");
-    nightImage.classList.add("hidden");
   }
 }
 
@@ -85,16 +81,22 @@ likeBtns.forEach((likeBtn) => {
 //! Currency
 
 const data = {
-  dollar: { buy: 0, sell: 0 },
-  euro: { buy: 0, sell: 0 },
-  pln: { buy: 0, sell: 0 },
-  sek: { buy: 0, sell: 0 },
+  dollar: { buy: 0, sell: 0, bankId: 127 },
+  euro: { buy: 0, sell: 0, bankId: 127 },
+  pln: { buy: 0, sell: 0, bankId: 127 },
+  sek: { buy: 0, sell: "-", bankId: 262 },
 };
 
-async function fetchCurrentRates() {
+const cachedBankRates = {};
+
+async function fetchCurrentRates(bankId) {
+  if (cachedBankRates[bankId]) {
+    return cachedBankRates[bankId];
+  }
+
   const today = new Date().toISOString().split("T")[0];
   const proxyUrl = "https://api.allorigins.win/get?url=";
-  const targetUrl = `https://www.sravni.ru/proxy-currencies-frontend/bank-rates?bankId=127&dateFrom=${today}`;
+  const targetUrl = `https://www.sravni.ru/proxy-currencies-frontend/bank-rates?bankId=${bankId}&dateFrom=${today}`;
 
   try {
     console.log("Запрос к API:", proxyUrl + encodeURIComponent(targetUrl));
@@ -106,19 +108,19 @@ async function fetchCurrentRates() {
     console.log("Полученные данные:", responseData);
     const currentRates = JSON.parse(responseData.contents);
     console.log("Разобранные данные:", currentRates);
+    cachedBankRates[bankId] = currentRates;
     localStorage.setItem(
-      "cachedRates",
+      `cachedRates_${bankId}`,
       JSON.stringify({ timestamp: Date.now(), rates: currentRates })
     );
     return currentRates;
   } catch (error) {
     console.error("Не удалось получить текущие курсы:", error);
-    const cachedRates = localStorage.getItem("cachedRates");
+    const cachedRates = localStorage.getItem(`cachedRates_${bankId}`);
     if (cachedRates) {
       const parsedRates = JSON.parse(cachedRates);
       const age = Date.now() - parsedRates.timestamp;
       if (age < 86400000) {
-        // Используем кэшированные данные в течение суток
         return parsedRates.rates;
       }
     }
@@ -135,7 +137,25 @@ function getCurrencyRates(currentRates, currencyCode, today) {
   return rate ? { buy: rate.ask, sell: rate.bid } : { buy: 0, sell: 0 };
 }
 
-function updateRates(currentRates) {
+function calculateRates(currency, currentRate, rates) {
+  const adjustments = {
+    dollar: { buy: 5.28, sell: -3.78 },
+    euro: { buy: 6.12, sell: -4.42 },
+    pln: { buy: 2.6, sell: -2.1 },
+    sek: { buy: -0.51, sell: -1 },
+  };
+
+  const adjustment = adjustments[currency] || { buy: 0, sell: 0 };
+
+  const buyRate =
+    rates.buy !== 0 ? rates.buy : currentRate.buy + adjustment.buy;
+  const sellRate =
+    rates.sell !== 0 ? rates.sell : currentRate.sell + adjustment.sell;
+
+  return { buyRate, sellRate };
+}
+
+async function updateRates() {
   const today = new Date().toISOString().split("T")[0];
   const currencyMap = {
     dollar: "USD",
@@ -145,58 +165,36 @@ function updateRates(currentRates) {
   };
 
   for (const [currency, rates] of Object.entries(data)) {
-    const buyElement = document.getElementById(`buy-${currency}`);
-    const sellElement = document.getElementById(`sell-${currency}`);
+    const currentRates = await fetchCurrentRates(rates.bankId);
 
-    const currentRate = getCurrencyRates(
-      currentRates,
-      currencyMap[currency],
-      today
-    );
-    console.log(
-      `Начальный курс ${currency}: Покупка - ${currentRate.buy}, Продажа - ${currentRate.sell}`
-    );
+    if (currentRates) {
+      const buyElement = document.getElementById(`buy-${currency}`);
+      const sellElement = document.getElementById(`sell-${currency}`);
 
-    let buyRate;
-    let sellRate;
+      const currentRate = getCurrencyRates(
+        currentRates,
+        currencyMap[currency],
+        today
+      );
+      console.log(
+        `Начальный курс ${currency}: Покупка - ${currentRate.buy}, Продажа - ${currentRate.sell}`
+      );
 
-    switch (currency) {
-      case "dollar":
-        buyRate = rates.buy !== 0 ? rates.buy : currentRate.buy + 5;
-        sellRate = rates.sell !== 0 ? rates.sell : currentRate.sell - 4;
-        break;
-      case "euro":
-        buyRate = rates.buy !== 0 ? rates.buy : currentRate.buy + 5;
-        sellRate = rates.sell !== 0 ? rates.sell : currentRate.sell - 4;
-        break;
-      case "pln":
-        buyRate = rates.buy !== 0 ? rates.buy : currentRate.buy + 2;
-        sellRate = rates.sell !== 0 ? rates.sell : currentRate.sell - 2;
-        break;
-      case "sek":
-        buyRate = rates.buy !== 0 ? rates.buy : currentRate.buy + 1;
-        sellRate = rates.sell !== 0 ? rates.sell : currentRate.sell - 1;
-        break;
-      default:
-        buyRate = rates.buy;
-        sellRate = rates.sell;
+      const { buyRate, sellRate } = calculateRates(
+        currency,
+        currentRate,
+        rates
+      );
+
+      console.log(
+        `Обновляем ${currency}: Покупка - ${buyRate}, Продажа - ${sellRate}`
+      );
+      buyElement.textContent = buyRate.toFixed(2);
+      sellElement.textContent = sellRate.toFixed(2);
+    } else {
+      console.log(`Не удалось обновить курсы для ${currency}`);
     }
-
-    console.log(
-      `Обновляем ${currency}: Покупка - ${buyRate}, Продажа - ${sellRate}`
-    );
-    buyElement.textContent = buyRate.toFixed(2);
-    sellElement.textContent = sellRate.toFixed(2);
   }
 }
 
-async function init() {
-  const currentRates = await fetchCurrentRates();
-  if (currentRates) {
-    updateRates(currentRates);
-  } else {
-    console.log("Используются стандартные курсы.");
-  }
-}
-
-init();
+updateRates();
