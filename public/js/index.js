@@ -1,32 +1,38 @@
 //! Active Navbar Item
 
 const navItems = document.querySelectorAll(".nav-item");
+const contentItems = document.querySelectorAll(".block-content");
 
-navItems.forEach((navItem, i) => {
-  navItem.addEventListener("click", () => {
-    navItems.forEach((item, j) => {
-      item.className = "nav-item";
-    });
-    navItem.className = "nav-item active";
+function handleNavClick(event) {
+  navItems.forEach((item) => {
+    item.classList.remove("active");
   });
+  event.currentTarget.classList.add("active");
+  contentItems.forEach((content) => {
+    content.style.display = "none";
+  });
+
+  const contentId =
+    event.currentTarget.querySelector("a").getAttribute("href").substring(1) +
+    "-content";
+  document.getElementById(contentId).style.display = "block";
+}
+navItems.forEach((item) => {
+  item.addEventListener("click", handleNavClick);
 });
 
-//! Light/Dark Mode
-
-const moonIcon = document.querySelector(".moon");
-const sunIcon = document.querySelector(".sun");
-const nightImage = document.querySelector(".night-img");
-const morningImage = document.querySelector(".morning-img");
-const toggle = document.querySelector(".toggle");
-
-function switchTheme() {
-  document.body.classList.toggle("darkmode");
-  if (document.body.classList.contains("darkmode")) {
-    sunIcon.classList.remove("hidden");
-    moonIcon.classList.add("hidden");
-  } else {
-    sunIcon.classList.add("hidden");
-    moonIcon.classList.remove("hidden");
+const initialHash = window.location.hash;
+if (initialHash) {
+  const initialNavItem = document.querySelector(
+    `.nav-item a[href="${initialHash}"]`
+  ).parentElement;
+  if (initialNavItem) {
+    initialNavItem.click();
+  }
+} else {
+  const firstNavItem = navItems[0];
+  if (firstNavItem) {
+    firstNavItem.click();
   }
 }
 
@@ -81,10 +87,10 @@ likeBtns.forEach((likeBtn) => {
 //! Currency
 
 const data = {
-  dollar: { buy: 0, sell: 0, bankId: 127 },
-  euro: { buy: 0, sell: 0, bankId: 127 },
-  pln: { buy: 0, sell: 0, bankId: 127 },
-  sek: { buy: 0, sell: "-", bankId: 262 },
+  dollar: { buy: null, sell: null, bankId: 127 },
+  euro: { buy: null, sell: null, bankId: 127 },
+  pln: { buy: null, sell: null, bankId: 127 },
+  sek: { buy: null, sell: 0, bankId: 262 },
 };
 
 const cachedBankRates = {};
@@ -134,23 +140,25 @@ function getCurrencyRates(currentRates, currencyCode, today) {
       rate.currency.isoCode === currencyCode &&
       rate.updateDate.startsWith(today)
   );
-  return rate ? { buy: rate.ask, sell: rate.bid } : { buy: 0, sell: 0 };
+  return rate
+    ? { buy: rate.ask, sell: rate.bid, updateDate: rate.updateDate }
+    : { buy: 0, sell: 0, updateDate: null };
 }
 
 function calculateRates(currency, currentRate, rates) {
   const adjustments = {
-    dollar: { buy: 5.28, sell: -3.78 },
-    euro: { buy: 6.12, sell: -4.42 },
-    pln: { buy: 2.6, sell: -2.1 },
-    sek: { buy: -0.51, sell: -1 },
+    dollar: { buy: 5, sell: -4 },
+    euro: { buy: 5.4, sell: -5 },
+    pln: { buy: 2.5, sell: -2 },
+    sek: { buy: -0.87, sell: -1 },
   };
 
   const adjustment = adjustments[currency] || { buy: 0, sell: 0 };
 
   const buyRate =
-    rates.buy !== 0 ? rates.buy : currentRate.buy + adjustment.buy;
+    rates.buy !== null ? rates.buy : currentRate.buy + adjustment.buy;
   const sellRate =
-    rates.sell !== 0 ? rates.sell : currentRate.sell + adjustment.sell;
+    rates.sell !== null ? rates.sell : currentRate.sell + adjustment.sell;
 
   return { buyRate, sellRate };
 }
@@ -163,6 +171,8 @@ async function updateRates() {
     pln: "PLN",
     sek: "SEK",
   };
+
+  let latestUpdateTime = null;
 
   for (const [currency, rates] of Object.entries(data)) {
     const currentRates = await fetchCurrentRates(rates.bankId);
@@ -191,8 +201,22 @@ async function updateRates() {
       );
       buyElement.textContent = buyRate.toFixed(2);
       sellElement.textContent = sellRate.toFixed(2);
+
+      if (currentRate.updateDate) {
+        const updateDate = new Date(currentRate.updateDate);
+        if (!latestUpdateTime || updateDate > latestUpdateTime) {
+          latestUpdateTime = updateDate;
+        }
+      }
     } else {
       console.log(`Не удалось обновить курсы для ${currency}`);
+    }
+  }
+
+  if (latestUpdateTime) {
+    const dateElement = document.querySelector(".date-upd-currency");
+    if (dateElement) {
+      dateElement.textContent = `${latestUpdateTime.toLocaleDateString()} ${latestUpdateTime.toLocaleTimeString()}`;
     }
   }
 }
