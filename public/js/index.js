@@ -75,10 +75,10 @@ loadTheme();
 //! Currency
 
 const corrections = {
-  usd: { buy: -4.8, sell: +5 },
-  eur: { buy: -4.8, sell: +5.4 },
-  pln: { buy: -2.6, sell: +2.3 },
-  sek: { buy: -0.15, sell: null },
+  usd: { buy: -5, sell: +5 },
+  eur: { buy: -5, sell: +5 },
+  pln: { buy: -2, sell: +2 },
+  sek: { buy: -0.2, sell: null },
 };
 
 const proxyUrl = "https://api.allorigins.win/get?url=";
@@ -217,21 +217,6 @@ async function fetchData() {
       el.classList.remove("updating");
     });
 }
-
-// Обработчик для кнопки обновления
-const reloadButton = document.querySelector(".reload-currency");
-if (reloadButton) {
-  reloadButton.addEventListener("click", async () => {
-    updateCurrencyElements("usd", "**.**", "**.**");
-    updateCurrencyElements("eur", "**.**", "**.**");
-    updateCurrencyElements("pln", "**.**", "**.**");
-    updateCurrencyElements("sek", "**.**", "**.**");
-    updateDate("**:** **.**.****");
-
-    fetchData();
-  });
-}
-
 // Вызываем функции при загрузке страницы
 fetchData();
 
