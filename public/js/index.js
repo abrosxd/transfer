@@ -212,182 +212,164 @@ loadTheme();
 // updateRates();
 
 const corrections = {
-  dollar: { buy: -4.8, sell: +5 },
-  euro: { buy: -4.8, sell: +5.4 },
+  usd: { buy: -4.8, sell: +5 },
+  eur: { buy: -4.8, sell: +5.4 },
   pln: { buy: -2.6, sell: +2.3 },
-  sek: { buy: -0.4, sell: null },
+  sek: { buy: -0.6, sell: null },
 };
 
 const proxyUrl = "https://api.allorigins.win/get?url=";
 const currencyUrl = "https://ru.myfin.by/bank/energotransbank/currency";
 const sekUrl = "https://ru.myfin.by/currency/cb-rf/sek?conv_sek=1";
 
+// Функция для форматирования валюты с учётом коррекции
 function formatCurrency(value, correction) {
-  if (correction === null) {
+  if (value === "**.**") {
+    return "**.**";
+  }
+  if (isNaN(value)) {
+    console.error(`Некорректное значение валюты: ${value}`);
     return "-";
-  } else {
-    return value.toFixed(2);
+  }
+  return correction === null ? "-" : (value + correction).toFixed(2);
+}
+
+// Функция для обновления данных на странице
+function updateCurrencyElements(currency, buyPrice, sellPrice) {
+  const buyElement = document.getElementById(`buy-${currency}`);
+  const sellElement = document.getElementById(`sell-${currency}`);
+
+  if (buyElement && sellElement) {
+    buyElement.textContent = formatCurrency(
+      buyPrice,
+      corrections[currency].buy
+    );
+    sellElement.textContent = formatCurrency(
+      sellPrice,
+      corrections[currency].sell
+    );
   }
 }
 
-// Функция для получения данных о SEK и коррекции их
+// Функция для обновления даты на странице
+function updateDate(dateText) {
+  const dateElement = document.querySelector(".date-upd-currency");
+  if (dateElement) {
+    dateElement.textContent = dateText;
+  }
+}
+
+// Функция для парсинга HTML и получения курса валюты
+async function fetchCurrency(url, selector, callback) {
+  try {
+    const response = await fetch(proxyUrl + encodeURIComponent(url));
+    if (!response.ok) {
+      throw new Error(`Ошибка сети: ${response.status} ${response.statusText}`);
+    }
+    const result = await response.json();
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(result.contents, "text/html");
+
+    const element = doc.querySelector(selector);
+    if (element) {
+      callback(element);
+    } else {
+      console.error("Элемент не найден по селектору:", selector);
+    }
+  } catch (error) {
+    console.error("Ошибка при получении данных валюты:", error);
+  }
+}
+
+// Функция для получения и коррекции данных SEK
 async function fetchSekCurrency() {
-  try {
-    const response = await fetch(proxyUrl + encodeURIComponent(sekUrl));
-    const result = await response.json();
-
-    // Парсим HTML для SEK
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(result.contents, "text/html");
-
-    // Находим элемент с курсом шведской кроны
-    const sekElement = doc.querySelector(".col-xs-6.no-padding.value p.h1");
-
-    if (sekElement) {
-      let sekRate = parseFloat(sekElement.textContent.trim());
-
-      // Разделяем на 10 и корректируем данные
-      sekRate = sekRate / 10;
-      const buySek = sekRate + corrections.sek.buy;
-      const sellSek = sekRate + corrections.sek.sell;
-
-      console.log("Крона: Покупка:", buySek, "Продажа:", sellSek);
-
-      // Форматируем с учётом коррекции
-      const buySekElement = document.getElementById("buy-sek");
-      const sellSekElement = document.getElementById("sell-sek");
-
-      if (buySekElement && sellSekElement) {
-        buySekElement.textContent = formatCurrency(buySek, corrections.sek.buy);
-        sellSekElement.textContent = formatCurrency(
-          sellSek,
-          corrections.sek.sell
-        );
-      } else {
-        console.error("Элементы для SEK не найдены.");
-      }
-    } else {
-      console.error("Курс SEK не найден");
+  await fetchCurrency(sekUrl, ".col-xs-6.no-padding.value p.h1", (element) => {
+    let sekRate = parseFloat(element.textContent.trim()) / 10;
+    if (isNaN(sekRate)) {
+      console.error("Некорректные данные для SEK:", sekRate);
+      return;
     }
-  } catch (error) {
-    console.error("Ошибка при получении данных SEK:", error);
-  }
+    const buySek = sekRate + corrections.sek.buy;
+    const sellSek = sekRate + corrections.sek.sell;
+
+    updateCurrencyElements("sek", buySek, sellSek);
+  });
 }
 
-// Функция для получения данных с сайта через прокси
+// Функция для получения данных с основной таблицы и коррекции
 async function fetchCurrencyData() {
-  try {
-    const response = await fetch(proxyUrl + encodeURIComponent(currencyUrl));
-    const result = await response.json();
+  await fetchCurrency(currencyUrl, "#w0", (table) => {
+    const rows = table.querySelectorAll("tr");
 
-    // Парсинг HTML
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(result.contents, "text/html");
+    if (rows.length >= 4) {
+      const usdCells = rows[1].querySelectorAll("td");
+      const usdBuyPrice = parseFloat(usdCells[1].textContent.trim());
+      const usdSellPrice = parseFloat(usdCells[2].textContent.trim());
+      updateCurrencyElements("usd", usdBuyPrice, usdSellPrice);
 
-    // Находим таблицу с данными
-    const table = doc.querySelector("#w0 .table-best tbody");
+      const eurCells = rows[2].querySelectorAll("td");
+      const eurBuyPrice = parseFloat(eurCells[1].textContent.trim());
+      const eurSellPrice = parseFloat(eurCells[2].textContent.trim());
+      updateCurrencyElements("eur", eurBuyPrice, eurSellPrice);
 
-    if (table) {
-      const rows = table.querySelectorAll("tr");
-
-      rows.forEach((row) => {
-        const cells = row.querySelectorAll("td");
-
-        if (cells.length >= 5) {
-          const currencyName = cells[0]?.textContent?.trim();
-          const buyPrice = parseFloat(cells[1]?.textContent?.trim());
-          const sellPrice = parseFloat(cells[2]?.textContent?.trim());
-
-          // console.log(
-          //   "Валюта:",
-          //   currencyName,
-          //   "Покупка:",
-          //   buyPrice,
-          //   "Продажа:",
-          //   sellPrice
-          // );
-
-          if (currencyName === "Доллар") {
-            const buyDollar = buyPrice + corrections.dollar.buy;
-            const sellDollar = sellPrice + corrections.dollar.sell;
-            console.log("Доллар: Покупка:", buyDollar, "Продажа:", sellDollar);
-
-            const buyDollarElement = document.getElementById("buy-dollar");
-            const sellDollarElement = document.getElementById("sell-dollar");
-
-            if (buyDollarElement && sellDollarElement) {
-              buyDollarElement.textContent = formatCurrency(
-                buyDollar,
-                corrections.dollar.buy
-              );
-              sellDollarElement.textContent = formatCurrency(
-                sellDollar,
-                corrections.dollar.sell
-              );
-            } else {
-              console.error("Элементы для доллара не найдены.");
-            }
-          } else if (currencyName === "Евро") {
-            const buyEuro = buyPrice + corrections.euro.buy;
-            const sellEuro = sellPrice + corrections.euro.sell;
-            console.log("Евро: Покупка:", buyEuro, "Продажа:", sellEuro);
-
-            const buyEuroElement = document.getElementById("buy-euro");
-            const sellEuroElement = document.getElementById("sell-euro");
-
-            if (buyEuroElement && sellEuroElement) {
-              buyEuroElement.textContent = formatCurrency(
-                buyEuro,
-                corrections.euro.buy
-              );
-              sellEuroElement.textContent = formatCurrency(
-                sellEuro,
-                corrections.euro.sell
-              );
-            } else {
-              console.error("Элементы для евро не найдены.");
-            }
-          } else if (currencyName === "Злотый") {
-            const buyPln = buyPrice + corrections.pln.buy;
-            const sellPln = sellPrice + corrections.pln.sell;
-            console.log("Злотый: Покупка:", buyPln, "Продажа:", sellPln);
-
-            const buyPlnElement = document.getElementById("buy-pln");
-            const sellPlnElement = document.getElementById("sell-pln");
-
-            if (buyPlnElement && sellPlnElement) {
-              buyPlnElement.textContent = formatCurrency(
-                buyPln,
-                corrections.pln.buy
-              );
-              sellPlnElement.textContent = formatCurrency(
-                sellPln,
-                corrections.pln.sell
-              );
-            } else {
-              console.error("Элементы для злотого не найдены.");
-            }
-          }
-
-          // Обновляем дату на странице
-          const dateUpdate = cells[4]?.textContent?.trim();
-          document.querySelector(".date-upd-currency").textContent = dateUpdate;
-        }
-      });
-    } else {
-      console.error("Таблица с данными не найдена.");
+      const plnCells = rows[3].querySelectorAll("td");
+      const plnBuyPrice = parseFloat(plnCells[1].textContent.trim());
+      const plnSellPrice = parseFloat(plnCells[2].textContent.trim());
+      updateCurrencyElements("pln", plnBuyPrice, plnSellPrice);
     }
-  } catch (error) {
-    console.error("Ошибка при получении данных:", error);
-  }
+
+    const updateDateElement = table.querySelector(".date_update");
+    if (updateDateElement) {
+      const updateDateText = updateDateElement.textContent.trim();
+      updateDate(updateDateText);
+    } else {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+      const formattedDate = `${day}.${month}.${year}`;
+
+      updateDate(formattedDate);
+    }
+  });
+}
+
+// Функция для параллельного выполнения запросов
+async function fetchData() {
+  // Добавляем класс "updating" к элементам
+  document
+    .querySelectorAll(".event-number.card .grid, .date-upd-currency")
+    .forEach((el) => {
+      el.classList.add("updating");
+    });
+
+  // Выполняем обновление данных
+  await Promise.all([fetchCurrencyData(), fetchSekCurrency()]);
+
+  // Убираем класс "updating" после завершения обновления данных
+  document
+    .querySelectorAll(".event-number.card .grid, .date-upd-currency")
+    .forEach((el) => {
+      el.classList.remove("updating");
+    });
+}
+
+// Обработчик для кнопки обновления
+const reloadButton = document.querySelector(".reload-currency");
+if (reloadButton) {
+  reloadButton.addEventListener("click", async () => {
+    updateCurrencyElements("usd", "**.**", "**.**");
+    updateCurrencyElements("eur", "**.**", "**.**");
+    updateCurrencyElements("pln", "**.**", "**.**");
+    updateCurrencyElements("sek", "**.**", "**.**");
+    updateDate("**:** **.**.****");
+
+    await fetchData();
+  });
 }
 
 // Вызываем функции при загрузке страницы
-async function fetchData() {
-  await fetchCurrencyData();
-  await fetchSekCurrency();
-}
-
 fetchData();
 
 // Swiper Reviews
