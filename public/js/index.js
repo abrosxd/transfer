@@ -74,143 +74,6 @@ loadTheme();
 
 //! Currency
 
-// const data = {
-//   dollar: { buy: null, sell: null, bankId: 127 },
-//   euro: { buy: null, sell: null, bankId: 127 },
-//   pln: { buy: null, sell: null, bankId: 127 },
-//   sek: { buy: null, sell: 0, bankId: 262 },
-// };
-
-// const cachedBankRates = {};
-
-// async function fetchCurrentRates(bankId) {
-//   if (cachedBankRates[bankId]) {
-//     return cachedBankRates[bankId];
-//   }
-
-//   const today = new Date().toISOString().split("T")[0];
-//   const proxyUrl = "https://api.allorigins.win/get?url=";
-//   const targetUrl = `https://www.sravni.ru/proxy-currencies-frontend/bank-rates?bankId=${bankId}&dateFrom=${today}`;
-
-//   try {
-//     console.log("Запрос к API:", proxyUrl + encodeURIComponent(targetUrl));
-//     const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-//     if (!response.ok) {
-//       throw new Error(`Ошибка HTTP: ${response.status}`);
-//     }
-//     const responseData = await response.json();
-//     console.log("Полученные данные:", responseData);
-//     const currentRates = JSON.parse(responseData.contents);
-//     console.log("Разобранные данные:", currentRates);
-//     cachedBankRates[bankId] = currentRates;
-//     localStorage.setItem(
-//       `cachedRates_${bankId}`,
-//       JSON.stringify({ timestamp: Date.now(), rates: currentRates })
-//     );
-//     return currentRates;
-//   } catch (error) {
-//     console.error("Не удалось получить текущие курсы:", error);
-//     const cachedRates = localStorage.getItem(`cachedRates_${bankId}`);
-//     if (cachedRates) {
-//       const parsedRates = JSON.parse(cachedRates);
-//       const age = Date.now() - parsedRates.timestamp;
-//       if (age < 86400000) {
-//         return parsedRates.rates;
-//       }
-//     }
-//     return null;
-//   }
-// }
-
-// function getCurrencyRates(currentRates, currencyCode, today) {
-//   const rate = currentRates.find(
-//     (rate) =>
-//       rate.currency.isoCode === currencyCode &&
-//       rate.updateDate.startsWith(today)
-//   );
-//   return rate
-//     ? { buy: rate.ask, sell: rate.bid, updateDate: rate.updateDate }
-//     : { buy: 0, sell: 0, updateDate: null };
-// }
-
-// function calculateRates(currency, currentRate, rates) {
-//   const adjustments = {
-//     dollar: { buy: 5, sell: -4 },
-//     euro: { buy: 5.4, sell: -5 },
-//     pln: { buy: 2.5, sell: -2 },
-//     sek: { buy: -0.87, sell: -1 },
-//   };
-
-//   const adjustment = adjustments[currency] || { buy: 0, sell: 0 };
-
-//   const buyRate =
-//     rates.buy !== null ? rates.buy : currentRate.buy + adjustment.buy;
-//   const sellRate =
-//     rates.sell !== null ? rates.sell : currentRate.sell + adjustment.sell;
-
-//   return { buyRate, sellRate };
-// }
-
-// async function updateRates() {
-//   const today = new Date().toISOString().split("T")[0];
-//   const currencyMap = {
-//     dollar: "USD",
-//     euro: "EUR",
-//     pln: "PLN",
-//     sek: "SEK",
-//   };
-
-//   let latestUpdateTime = null;
-
-//   for (const [currency, rates] of Object.entries(data)) {
-//     const currentRates = await fetchCurrentRates(rates.bankId);
-
-//     if (currentRates) {
-//       const buyElement = document.getElementById(`buy-${currency}`);
-//       const sellElement = document.getElementById(`sell-${currency}`);
-
-//       const currentRate = getCurrencyRates(
-//         currentRates,
-//         currencyMap[currency],
-//         today
-//       );
-//       console.log(
-//         `Начальный курс ${currency}: Покупка - ${currentRate.buy}, Продажа - ${currentRate.sell}`
-//       );
-
-//       const { buyRate, sellRate } = calculateRates(
-//         currency,
-//         currentRate,
-//         rates
-//       );
-
-//       console.log(
-//         `Обновляем ${currency}: Покупка - ${buyRate}, Продажа - ${sellRate}`
-//       );
-//       buyElement.textContent = buyRate.toFixed(2);
-//       sellElement.textContent = sellRate.toFixed(2);
-
-//       if (currentRate.updateDate) {
-//         const updateDate = new Date(currentRate.updateDate);
-//         if (!latestUpdateTime || updateDate > latestUpdateTime) {
-//           latestUpdateTime = updateDate;
-//         }
-//       }
-//     } else {
-//       console.log(`Не удалось обновить курсы для ${currency}`);
-//     }
-//   }
-
-//   if (latestUpdateTime) {
-//     const dateElement = document.querySelector(".date-upd-currency");
-//     if (dateElement) {
-//       dateElement.textContent = `${latestUpdateTime.toLocaleDateString()} ${latestUpdateTime.toLocaleTimeString()}`;
-//     }
-//   }
-// }
-
-// updateRates();
-
 const corrections = {
   usd: { buy: -4.8, sell: +5 },
   eur: { buy: -4.8, sell: +5.4 },
@@ -219,8 +82,8 @@ const corrections = {
 };
 
 const proxyUrl = "https://api.allorigins.win/get?url=";
-const currencyUrl = "https://ru.myfin.by/bank/energotransbank/currency";
-const sekUrl = "https://ru.myfin.by/currency/cb-rf/sek?conv_sek=1";
+const currencyUrl = `https://ru.myfin.by/bank/energotransbank/currency?nocache=${new Date().getTime()}`;
+const sekUrl = `https://ru.myfin.by/currency/cb-rf/sek?conv_sek=1&nocache=${new Date().getTime()}`;
 
 // Функция для форматирования валюты с учётом коррекции
 function formatCurrency(value, correction) {
