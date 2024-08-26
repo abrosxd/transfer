@@ -228,7 +228,7 @@ if (reloadButton) {
     updateCurrencyElements("sek", "**.**", "**.**");
     updateDate("**:** **.**.****");
 
-    await fetchData();
+    fetchData();
   });
 }
 
