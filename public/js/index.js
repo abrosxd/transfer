@@ -215,7 +215,7 @@ const corrections = {
   usd: { buy: -4.8, sell: +5 },
   eur: { buy: -4.8, sell: +5.4 },
   pln: { buy: -2.6, sell: +2.3 },
-  sek: { buy: -0.6, sell: null },
+  sek: { buy: -0.15, sell: null },
 };
 
 const proxyUrl = "https://api.allorigins.win/get?url=";
