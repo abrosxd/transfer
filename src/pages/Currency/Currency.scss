@@ -1,0 +1,105 @@
+.currency {
+  .status {
+    display: grid;
+    justify-content: center;
+    gap: 10px;
+
+    h1 {
+      text-align: center;
+    }
+
+    .items {
+      display: grid;
+      justify-content: center;
+      gap: 10px;
+
+      .date {
+        text-align: center;
+
+        .date-vault {
+          color: var(--accent-color);
+        }
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+
+        .card {
+          position: relative;
+          display: grid;
+          grid-auto-flow: dense;
+          grid-template-rows: 1fr 1fr;
+          padding: 10px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          background-color: var(--hover-color);
+          border-radius: 8px;
+          border: 2px solid var(--shadow-color);
+          box-sizing: border-box;
+
+          p {
+            color: var(--accent-color);
+          }
+
+          .name {
+            position: absolute;
+            left: 10px;
+            bottom: 12px;
+            font-size: small;
+            width: 85px;
+            line-height: 12px;
+          }
+
+          i {
+            position: absolute;
+            right: 8px;
+            bottom: 6px;
+            font-size: 2.5rem;
+          }
+
+          svg {
+            position: absolute;
+            right: 8px;
+            bottom: 6px;
+            height: 40px;
+            width: 40px;
+            padding: 5px;
+            fill: var(--text-color);
+          }
+        }
+      }
+    }
+  }
+
+  .info {
+    display: grid;
+    gap: 10px;
+
+    .card {
+      position: relative;
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      background-color: var(--hover-color);
+      border-radius: 8px;
+      border: 2px solid var(--shadow-color);
+      box-sizing: border-box;
+
+      h3 {
+        color: var(--accent-color);
+      }
+
+      ul {
+        margin: 0;
+      }
+
+      .eu-ru,
+      .ru-eu {
+        list-style: decimal;
+      }
+    }
+  }
+}

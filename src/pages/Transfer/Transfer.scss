@@ -1,0 +1,68 @@
+.transfer {
+  .status {
+    display: grid;
+    justify-content: center;
+    gap: 10px;
+
+    h1 {
+      text-align: center;
+    }
+
+    .items {
+      display: grid;
+      justify-content: center;
+      gap: 10px;
+
+      .title {
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+
+        .card {
+          position: relative;
+          padding: 10px;
+          display: grid;
+          gap: 10px;
+          background-color: var(--hover-color);
+          border-radius: 8px;
+          border: 2px solid var(--shadow-color);
+          box-sizing: border-box;
+          flex: 0 0 calc(33.33% - 10px);
+
+          @media (max-width: 767px) {
+            flex: 0 0 calc(100% - 10px);
+          }
+
+          h3 {
+            color: var(--accent-color);
+          }
+
+          .grid {
+            display: grid;
+            gap: 10px;
+
+            div {
+              h5:first-of-type {
+                opacity: 0.6;
+              }
+            }
+
+            ul {
+              margin: 0;
+              padding-inline-start: 20px;
+
+              li {
+                font-size: 0.83em;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

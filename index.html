@@ -1,83 +1,35 @@
-<!DOCTYPE html PUBLIC>
-<html>
+<!DOCTYPE html>
+<html lang="ru">
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tip Top</title>
     <!--metatextblock-->
-    <title>Tip Top Transfer</title>
     <meta
       name="description"
       content="🚘Мы с удовольствием организуем для вас трансфер RU/PL/EU"
     />
-    <meta property="og:title" content="Tip Top Transfer" />
+    <meta property="og:title" content="Tip Top" />
     <meta
       property="og:description"
       content="🚘Мы с удовольствием организуем для вас трансфер RU/PL/EU"
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="./public/assets/logo/icon512.webp" />
+    <meta property="og:image" content="/assets/all-transfer.gif" />
     <meta property="og:url" content="https://transfer.abros.dev" />
     <meta name="twitter:card" content="summary_large_image" />
     <!--/metatextblock-->
-    <link rel="icon" href="./public/assets/logo/favicon.ico" sizes="any" />
+    <!-- <link rel="icon" href="/public/assets/icons/logo/logo.ico" sizes="any" />
+    <link
+      rel="icon"
+      href="/public/assets/icons/logo/logo.svg"
+      type="image/svg+xml"
+    />
     <link
       rel="apple-touch-icon"
-      href="./public/assets/logo/touch-icon-iphone.png"
-    />
-    <link
-      rel="icon"
-      type="image/webp"
-      sizes="16x16"
-      href="./public/assets/logo/icon16.webp"
-    />
-    <link
-      rel="icon"
-      type="image/webp"
-      sizes="32x32"
-      href="./public/assets/logo/icon32.webp"
-    />
-    <link
-      rel="icon"
-      type="image/webp"
-      sizes="64x64"
-      href="./public/assets/logo/icon64.webp"
-    />
-    <link
-      rel="icon"
-      type="image/webp"
-      sizes="128x128"
-      href="./public/assets/logo/icon128.webp"
-    />
-    <link
-      rel="icon"
-      type="image/webp"
-      sizes="256x256"
-      href="./public/assets/logo/icon256.webp"
-    />
-    <link
-      rel="icon"
-      type="image/webp"
-      sizes="512x512"
-      href="./public/assets/logo/icon512.webp"
-    />
+      href="/public/assets/icons/logo/apple-touch-icon.png"
+    /> -->
     <link rel="manifest" href="./site.webmanifest" />
-    <meta name="msapplication-TileColor" content="#a519ff" />
-    <meta name="theme-color" content="#f0f6f9" />
-    <link
-      rel="android-chrome-192x192"
-      href="./public/assets/logo/android-chrome-192x192.png"
-    />
-    <link
-      rel="android-chrome-256x256"
-      href="./public/assets/logo/android-chrome-256x256.png"
-    />
-    <link
-      rel="android-chrome-512x512"
-      href="./public/assets/logo/android-chrome-512x512.png"
-    />
-    <!-- Assets -->
-    <link rel="stylesheet" href="./public/css/index.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -86,272 +38,31 @@
       rel="stylesheet"
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/swiper/swiper-bundle.min.css"
-    />
-    <script src="./src/js/jquery-3.7.1.min.js"></script>
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <meta name="msapplication-TileColor" content="#a519ff" />
+    <meta name="theme-color" content="#f0f6f9" />
+    <!-- Start Single Page Apps for GitHub Pages -->
+    <script type="text/javascript">
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
+    <!-- End Single Page Apps for GitHub Pages -->
   </head>
-  <body class="">
-    <nav class="main-menu">
-      <div>
-        <div class="app-info">
-          <img src="./public/assets/logo.jpeg" alt="logo" />
-          <p>Tip Top</p>
-        </div>
-        <ul>
-          <li class="nav-item active">
-            <a href="#home">
-              <i class="fa fa-house nav-icon"></i>
-              <span class="nav-text">Главная</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="#transfer">
-              <i class="fa fa-route nav-icon"></i>
-              <span class="nav-text">О трансферах</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="#parcel">
-              <i class="fa fa-boxes-packing nav-icon"></i>
-              <span class="nav-text">О посылках</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="#currency">
-              <i class="fa fa-money-bill-transfer nav-icon"></i>
-              <span class="nav-text">О переводах</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="#carpark">
-              <i class="fa fa-car nav-icon"></i>
-              <span class="nav-text">Автопарк</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- <ul> 
-        <li class="nav-item">
-          <a href="#">
-            <i class="fa fa-gear nav-icon"></i>
-            <span class="nav-text">Settings</span>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="#">
-            <i class="fa fa-right-from-bracket nav-icon"></i>
-            <span class="nav-text">Logout</span>
-          </a>
-        </li>
-      </ul> -->
-    </nav>
-
-    <div class="interaction-control interactions">
-      <div class="toggle" onclick="switchTheme()">
-        <div class="mode-icon moon">
-          <i class="fa fa-moon"></i>
-        </div>
-        <div class="mode-icon sun hidden">
-          <i class="fa fa-sun"></i>
-        </div>
-      </div>
-    </div>
-
-    <section class="content">
-      <div class="left-content">
-        <div id="home-content" class="block-content active">
-          <div class="reviews">
-            <h1>Отзывы</h1>
-            <div class="swiper swiper-reviews">
-              <div class="swiper-wrapper review-container"></div>
-            </div>
-          </div>
-          <div class="articles">
-            <h1>Статьи</h1>
-            <div class="articles-container">
-              <div class="card article-card">
-                <div class="top">
-                  <img
-                    src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/697ef286-1104-4c6c-91d6-0b2a1e04009b"
-                    alt=""
-                  />
-                  <p>Август 25, 21:52</p>
-                </div>
-                <div class="center">
-                  <h2>Скоро тут будет полезная статья</h2>
-                  <p>В разработке</p>
-                </div>
-                <!-- <div class="bottom">
-                  <p style="background-color: #e48e2c">Concert</p>
-                  <div class="btn-group">
-                    <button>Читать</button>
-                  </div>
-                </div> -->
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="transfer-content" class="block-content">...</div>
-        <div id="parcel-content" class="block-content">...</div>
-        <div id="currency-content" class="block-content">
-          <div class="analytics">
-            <h1>Актуальный курс</h1>
-            <div class="analytics-container">
-              <h2 class="date">
-                курс на <span class="date-upd-currency">**:** **.**.****</span>
-              </h2>
-              <div class="total-events">
-                <div id="usd" class="event-number card">
-                  <div class="grid">
-                    <h2>Покупка</h2>
-                    <p id="buy-usd">**.**</p>
-                  </div>
-                  <div class="grid">
-                    <h2>Продажа</h2>
-                    <p id="sell-usd">**.**</p>
-                  </div>
-                  <h2 class="currency">Доллар</h2>
-                  <i class="bx bx-dollar"></i>
-                </div>
-                <div id="eur" class="event-number card">
-                  <div class="grid">
-                    <h2>Покупка</h2>
-                    <p id="buy-eur">**.**</p>
-                  </div>
-                  <div class="grid">
-                    <h2>Продажа</h2>
-                    <p id="sell-eur">**.**</p>
-                  </div>
-                  <h2 class="currency">Евро</h2>
-                  <i class="bx bx-euro"></i>
-                </div>
-                <div id="pln" class="event-number card">
-                  <div class="grid">
-                    <h2>Покупка</h2>
-                    <p id="buy-pln">**.**</p>
-                  </div>
-                  <div class="grid">
-                    <h2>Продажа</h2>
-                    <p id="sell-pln">**.**</p>
-                  </div>
-                  <h2 class="currency">Польский злотый</h2>
-                  <svg viewBox="0 0 425.409 425.409">
-                    <polygon
-                      points="356.498,254.317 342.816,216.729 314.683,226.969 314.683,0 274.683,0 274.683,241.528 232.867,256.748 246.549,294.336 274.683,284.096 274.683,425.409 314.683,425.409 314.683,269.537 "
-                    ></polygon>
-                    <polygon
-                      points="255.204,120.57 255.204,85.656 68.911,85.656 68.911,125.656 207.405,125.656 68.911,390.496 68.911,425.409 255.204,425.409 255.204,385.409 116.71,385.409 "
-                    ></polygon>
-                  </svg>
-                </div>
-                <div id="sek" class="event-number card">
-                  <div class="grid">
-                    <h2>Покупка</h2>
-                    <p id="buy-sek">**.**</p>
-                  </div>
-                  <div class="grid">
-                    <h2>Продажа</h2>
-                    <p id="sell-sek">**.**</p>
-                  </div>
-                  <h2 class="currency">Шведская крона</h2>
-                  <svg viewBox="0 0 122.88 95.78">
-                    <path
-                      d="M18,58.35l8.19-10.46L45.45,27H66.63L39.32,56.82l29,39H46.63L26.82,67.89l-8.06,6.47V95.78H0V0H18.76V42.72l-1,15.63Zm98.52-32.64a31,31,0,0,1,6.34.55l-1.41,17.6a22,22,0,0,0-5.54-.61q-9,0-14,4.62t-5,12.92v35H78.16V27H92.38l2.75,11.59h.93a26.15,26.15,0,0,1,8.65-9.32,21.27,21.27,0,0,1,11.83-3.53Z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="info">
-            <h1>Какие услуги мы можем оказывать:</h1>
-            <ul class="card">
-              <li>
-                перевод денежных средств из России в Европу, а так же обратно.
-              </li>
-              <li>оплата счетов</li>
-              <li>оплата инвойсов</li>
-              <li>оплата товаров (доставка до Калининграда)</li>
-              <li>оплата обучения в вузах</li>
-            </ul>
-            <h1>Как происходит перевод из Европы в Россию:</h1>
-            <div class="card">
-              <p>1️⃣Согласовываем курс</p>
-              <p>2️⃣Вы делаете перевод</p>
-              <p>3️⃣Присылаете подтверждение перевода</p>
-              <p>
-                4️⃣По европе переводы идут до 2-ух рабочих дней (перевод по
-                Европе возможен только в рабочие дни)
-              </p>
-              <p>5️⃣Как только деньги поступили, мы делаем перевод Вам</p>
-              <p>6️⃣Мы присылаем подтверждение перевода</p>
-            </div>
-            <h1>Как происходит перевод из России в Европу:</h1>
-            <div class="card">
-              <p>1️⃣Согласовываем курс</p>
-              <p>
-                2️⃣Вы делаете перевод на российскую карту (деньги обычно
-                поступают мгновенно)
-              </p>
-              <p>3️⃣Присылаете нам скрин платежа</p>
-              <p>
-                4️⃣Мы делаем вам перевод по Европе (перевод идет до 2-ух рабочих
-                дней)
-              </p>
-              <p>5️⃣Мы присылаем вам скрин платежа</p>
-            </div>
-            <h1>Какие платежные системы мы используем:</h1>
-            <ul class="card">
-              <li>iBAN</li>
-              <li>Blik</li>
-              <li>Revolut</li>
-              <li>PayPal</li>
-              <li>USDT</li>
-              <li>Bitcoin</li>
-            </ul>
-          </div>
-        </div>
-        <div id="carpark-content" class="block-content">...</div>
-      </div>
-
-      <div class="right-content">
-        <div class="contacts">
-          <h1>Ссылки</h1>
-          <div class="contacts-container">
-            <div class="contact-status">
-              <div class="contact-activity">
-                <img src="./src/assets/no-image.jpeg" alt="Daniel Abros" />
-                <p>
-                  <a href="https://t.me/TipTopTransfer" target="_blank"
-                    >Telegram - Группа</a
-                  >
-                </p>
-              </div>
-            </div>
-            <div class="contact-status">
-              <div class="contact-activity">
-                <img src="./src/assets/no-image.jpeg" alt="Евгений" />
-                <p>
-                  <a href="https://t.me/TipTopDriver" target="_blank"
-                    >Telegram - Евгений</a
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <script src="./public/js/index.js"></script>
-    <script src="./src/js/preload.js"></script>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,0 +1,108 @@
+.parcel {
+  .status {
+    display: grid;
+    justify-content: center;
+    gap: 10px;
+
+    h1 {
+      text-align: center;
+    }
+
+    .items {
+      display: grid;
+      justify-content: center;
+      gap: 10px;
+
+      .title {
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+
+        .item {
+          padding: 10px;
+          background-color: var(--hover-color);
+          border: 2px solid var(--shadow-color);
+          border-radius: 8px;
+          display: grid;
+          gap: 10px;
+
+          .card {
+            position: relative;
+            display: grid;
+            grid-auto-flow: dense;
+            padding: 60px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 30px;
+            background-image: url(/assets/pl-ru-parcel.png);
+            background-size: cover;
+            border-radius: 8px;
+            box-sizing: border-box;
+
+            @media (max-width: 767px) {
+              padding: 40px;
+            }
+
+            &::before {
+              content: "→";
+              color: black;
+              font-size: x-large;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+            }
+
+            h3 {
+              color: black;
+
+              &:first-of-type {
+                text-align: end;
+              }
+
+              &:last-of-type {
+                text-align: start;
+              }
+            }
+            h4 {
+              color: var(--text-color);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .info {
+    display: grid;
+    gap: 10px;
+
+    .card {
+      position: relative;
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      background-color: var(--hover-color);
+      border-radius: 8px;
+      border: 2px solid var(--shadow-color);
+      box-sizing: border-box;
+
+      h3 {
+        color: var(--accent-color);
+      }
+
+      ul {
+        margin: 0;
+      }
+
+      .eu-ru,
+      .ru-eu {
+        list-style: decimal;
+      }
+    }
+  }
+}
