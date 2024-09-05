@@ -1,16 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSettings } from "../../utils/Settings";
 import "./Currency.scss";
 
-function formatCurrency(value, correction) {
+function formatCurrency(value) {
   const parsedValue = parseFloat(value);
-  const parsedCorrection = parseFloat(correction);
-
-  if (isNaN(parsedValue) || isNaN(parsedCorrection)) {
-    return "-";
-  }
-
-  return (parsedValue + parsedCorrection).toFixed(2);
+  return isNaN(parsedValue) ? "-" : parsedValue.toFixed(2);
 }
 
 const CurrencyCard = ({ buyPrice, sellPrice, icon, name }) => (
@@ -29,16 +23,7 @@ const CurrencyCard = ({ buyPrice, sellPrice, icon, name }) => (
 );
 
 export default function Currency() {
-  const {
-    apiKey,
-    baseId,
-    tableCurrency,
-    proxyUrl,
-    currencyUrl,
-    sekUrl,
-    fetchTableData,
-  } = useSettings();
-  const [corrections, setCorrections] = useState(null);
+  const { apiKey, baseId, tableCurrency, fetchTableData } = useSettings();
   const [currencyData, setCurrencyData] = useState({
     usd: { buy: null, sell: null },
     eur: { buy: null, sell: null },
@@ -46,6 +31,7 @@ export default function Currency() {
     sek: { buy: null, sell: null },
     updateDate: null,
   });
+
   const currencyMap = {
     usd: "доллар",
     eur: "евро",
@@ -54,107 +40,37 @@ export default function Currency() {
   };
 
   useEffect(() => {
-    const loadCorrections = async () => {
+    const loadCurrencyData = async () => {
       try {
-        const fetchedCorrections = await fetchTableData(
+        const fetchedRecords = await fetchTableData(
           apiKey,
           baseId,
           tableCurrency
         );
-        const correctionsData = fetchedCorrections.reduce((acc, record) => {
-          acc[record.Name.toLowerCase()] = {
-            buy: record.Покупка,
-            sell: record.Продажа,
+        const currencyData = fetchedRecords.reduce((acc, record) => {
+          const currencyKey = record.Name.toLowerCase();
+          acc[currencyKey] = {
+            buy: formatCurrency(record.Покупка),
+            sell: formatCurrency(record.Продажа),
           };
           return acc;
         }, {});
-        setCorrections(correctionsData);
+
+        setCurrencyData((prevData) => ({
+          ...prevData,
+          usd: currencyData["доллар"] || { buy: null, sell: null },
+          eur: currencyData["евро"] || { buy: null, sell: null },
+          pln: currencyData["польский злотый"] || { buy: null, sell: null },
+          sek: currencyData["шведская крона"] || { buy: null, sell: null },
+          updateDate: new Date().toLocaleDateString(),
+        }));
       } catch (error) {
         console.error("Ошибка при загрузке данных из Airtable:", error);
       }
     };
 
-    loadCorrections();
+    loadCurrencyData();
   }, [apiKey, baseId, tableCurrency, fetchTableData]);
-
-  const updateCurrencyData = useCallback(async () => {
-    if (!corrections) return;
-
-    const fetchCurrency = async (url, selector, processData) => {
-      try {
-        const response = await fetch(`${proxyUrl}${encodeURIComponent(url)}`);
-        if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
-
-        const result = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(result, "text/html");
-        const element = doc.querySelector(selector);
-
-        if (element) processData(element);
-      } catch (error) {
-        console.error("Ошибка при получении данных валюты:", error);
-      }
-    };
-
-    await fetchCurrency(currencyUrl, "#w0", (table) => {
-      const rows = table.querySelectorAll("tr");
-      if (rows.length >= 4) {
-        const updateDataForCurrency = (rowIndex, currencyKey) => {
-          const cells = rows[rowIndex].querySelectorAll("td");
-          const buyPrice = parseFloat(cells[1].textContent.trim());
-          const sellPrice = parseFloat(cells[2].textContent.trim());
-          const mappedCurrencyKey = currencyMap[currencyKey];
-
-          setCurrencyData((prevData) => ({
-            ...prevData,
-            [currencyKey]: {
-              buy: formatCurrency(
-                buyPrice,
-                corrections[mappedCurrencyKey]?.buy
-              ),
-              sell: formatCurrency(
-                sellPrice,
-                corrections[mappedCurrencyKey]?.sell
-              ),
-            },
-          }));
-        };
-
-        updateDataForCurrency(1, "usd");
-        updateDataForCurrency(2, "eur");
-        updateDataForCurrency(3, "pln");
-      }
-
-      const updateDateElement = table.querySelector(".date_update");
-      setCurrencyData((prevData) => ({
-        ...prevData,
-        updateDate: updateDateElement
-          ? updateDateElement.textContent.trim()
-          : new Date().toLocaleDateString(),
-      }));
-    });
-
-    await fetchCurrency(
-      sekUrl,
-      ".col-xs-6.no-padding.value p.h1",
-      (element) => {
-        const sekRate = parseFloat(element.textContent.trim()) / 10;
-        setCurrencyData((prevData) => ({
-          ...prevData,
-          sek: {
-            buy: formatCurrency(sekRate, corrections["шведская крона"]?.buy),
-            sell: formatCurrency(sekRate, corrections["шведская крона"]?.sell),
-          },
-        }));
-      }
-    );
-  }, [corrections, currencyUrl, sekUrl, proxyUrl]);
-
-  useEffect(() => {
-    if (corrections) {
-      updateCurrencyData();
-    }
-  }, [corrections, updateCurrencyData]);
 
   return (
     <main className="currency">
@@ -226,10 +142,6 @@ export default function Currency() {
             <li>Согласовываем курс</li>
             <li>Вы делаете перевод</li>
             <li>Присылаете подтверждение перевода</li>
-            <li>
-              По европе переводы идут до 2-ух рабочих дней (перевод по Европе
-              возможен только в рабочие дни)
-            </li>
             <li>Как только деньги поступили, мы делаем перевод Вам</li>
             <li>Мы присылаем подтверждение перевода</li>
           </ul>
@@ -238,14 +150,10 @@ export default function Currency() {
           <h3>Как происходит перевод из России в Европу:</h3>
           <ul className="ru-eu">
             <li>Согласовываем курс</li>
-            <li>
-              Вы делаете перевод на российскую карту (деньги обычно поступают
-              мгновенно)
-            </li>
+            <li>Вы делаете перевод на российскую карту</li>
             <li>Присылаете нам скрин платежа</li>
             <li>
-              Мы делаем вам перевод по Европе (перевод идет до 2-ух рабочих
-              дней)
+              Мы делаем вам перевод по Европе (перевод идет до 2 рабочих дней)
             </li>
             <li>Мы присылаем вам скрин платежа</li>
           </ul>

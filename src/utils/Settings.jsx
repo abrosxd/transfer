@@ -11,9 +11,6 @@ const settings = {
   tableTransfer: "Transfer",
   tableReviews: "Reviews",
   tableCurrency: "Currency",
-  proxyUrl: "https://thingproxy.freeboard.io/fetch/",
-  currencyUrl: `https://ru.myfin.by/bank/energotransbank/currency?nocache=${new Date().getTime()}`,
-  sekUrl: `https://ru.myfin.by/currency/cb-rf/sek?conv_sek=1&nocache=${new Date().getTime()}`,
 };
 
 async function fetchTableData(apiKey, baseId, tableName) {
