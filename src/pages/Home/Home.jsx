@@ -23,16 +23,49 @@ const Modal = ({ article, onClose }) => {
     setIsOpen(true);
   };
 
+  useEffect(() => {
+    document.body.classList.add("no-scroll");
+    return () => {
+      document.body.classList.remove("no-scroll");
+    };
+  }, []);
+
+  // Функция для обработки текста и превращения телефонов, ссылок и переносов строки в HTML
+  const processText = (text) => {
+    const linkRegex = /(https?:\/\/[^\s]+)/g;
+    const phoneRegex =
+      /(\+?[0-9]{1,4}[-\s]?[0-9]{2,4}[-\s]?[0-9]{2,4}[-\s]?[0-9]{2,4})/g;
+
+    // Замена ссылок, телефонов и переносов строки
+    const processedText = text
+      .replace(linkRegex, '<a href="$1" target="_blank">$1</a>')
+      .replace(phoneRegex, '<a href="tel:$1">$1</a>')
+      .replace(/\n/g, "<br />"); // Замена переносов строки на <br />
+
+    return { __html: processedText };
+  };
+
   return (
     <div className="modal">
       <div className="modal-content">
-        <span className="close" onClick={onClose}>
+        <span
+          className="close"
+          onClick={() => {
+            onClose();
+            document.body.classList.remove("no-scroll");
+          }}
+        >
           <i className="fa-solid fa-xmark"></i>
         </span>
         <h2>{title}</h2>
-        <p>{text}</p>
+        {/* Используем dangerouslySetInnerHTML для рендеринга обработанного HTML */}
+        <div
+          className="article-text"
+          dangerouslySetInnerHTML={processText(text)}
+        />
         <div className="gallery">
-          {photo && photo.length > 0 ? (
+          {photo &&
+            photo.length > 0 &&
             photo.map((img, index) => (
               <div
                 key={index}
@@ -44,10 +77,7 @@ const Modal = ({ article, onClose }) => {
                   alt={`Image ${index}`}
                 />
               </div>
-            ))
-          ) : (
-            <p>Нет изображений</p>
-          )}
+            ))}
         </div>
       </div>
 
@@ -64,10 +94,23 @@ const Modal = ({ article, onClose }) => {
   );
 };
 
-const ArticleCard = ({ title, cover, onClick }) => (
+const ArticleCard = ({ title, cover, tags, onClick }) => (
   <div className="card" onClick={onClick}>
     {title && <h3>{title}</h3>}
-    {cover && <img src={cover} alt={title} />}
+    {cover && (
+      <div className="img">
+        <img src={cover} alt={title} />
+      </div>
+    )}
+    {tags && (
+      <div className="tags">
+        {tags.map((tag, index) => (
+          <span key={index} className={`tag ${tag.toLowerCase()}`}>
+            {tag}
+          </span>
+        ))}
+      </div>
+    )}
   </div>
 );
 
@@ -78,6 +121,7 @@ export default function Home() {
   const [articles, setArticles] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedTag, setSelectedTag] = useState("Все"); // Состояние для выбранного тега
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -111,6 +155,7 @@ export default function Home() {
           cover: record.Обложка?.[0]?.url || "",
           text: record.Статья || "Текста нет",
           photo: record.Фотографии || [],
+          tags: record.Теги || [],
         }));
 
         setArticles(articlesData);
@@ -129,6 +174,16 @@ export default function Home() {
     setSelectedArticle(null);
   };
 
+  // Фильтрация статей по тегу
+  const filteredArticles =
+    selectedTag === "Все"
+      ? articles
+      : articles.filter((article) => article.tags.includes(selectedTag));
+
+  const handleTagChange = (event) => {
+    setSelectedTag(event.target.value);
+  };
+
   return (
     <main className="home">
       <div className="hello">
@@ -139,6 +194,7 @@ export default function Home() {
           <img className="star" src="/assets/star.gif" />
         </div>
       </div>
+
       <div className="reviews">
         <h2>Отзывы</h2>
         <Swiper
@@ -164,11 +220,25 @@ export default function Home() {
           ))}
         </Swiper>
       </div>
+
       <div className="articles">
-        <h2>Полезная информация</h2>
+        <h2>Полезное</h2>
+        <div className="filter">
+          <label htmlFor="tagFilter">Фильтр по тегам:</label>
+          <select id="tagFilter" value={selectedTag} onChange={handleTagChange}>
+            <option value="Все">Все</option>
+            <option value="Важное">Важное</option>
+            <option value="Новости">Новости</option>
+            <option value="Граница">Граница</option>
+            <option value="Трансферы">Трансферы</option>
+            <option value="Посылки">Посылки</option>
+            <option value="Финансы">Финансы</option>
+            <option value="Животные">Животные</option>
+          </select>
+        </div>
         <div className="container">
-          {articles.length > 0 ? (
-            articles.map((article, index) => (
+          {filteredArticles.length > 0 ? (
+            filteredArticles.map((article, index) => (
               <ArticleCard
                 key={index}
                 {...article}
@@ -180,6 +250,7 @@ export default function Home() {
           )}
         </div>
       </div>
+
       {selectedArticle && (
         <Modal article={selectedArticle} onClose={handleCloseModal} />
       )}

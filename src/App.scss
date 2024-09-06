@@ -52,3 +52,9 @@ h6,
 p {
   margin: 0;
 }
+
+.no-scroll {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}

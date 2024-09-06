@@ -10,6 +10,21 @@
     box-shadow: 0 0 10px var(--shadow-color);
   }
 
+  .form {
+    position: absolute;
+    top: 0;
+    right: 50px;
+    border-radius: 50px;
+    padding: 15px;
+    background-color: var(--accent-color);
+    color: white;
+    box-shadow: 0 0 10px var(--shadow-color);
+
+    &:hover {
+      background-color: var(--accent-color);
+    }
+  }
+
   .menu {
     display: none;
     position: absolute;
@@ -36,9 +51,12 @@
 
     .links {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
 
       .button {
+        width: fit-content;
         border: 1px solid;
       }
     }

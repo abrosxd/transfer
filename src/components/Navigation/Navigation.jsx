@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "./Navigation.scss";
 import Button from "../../partials/Button/Button";
+import FeedbackModal from "../../widgets/FeedbackModal/FeedbackModal";
 
 export default function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -9,6 +10,7 @@ export default function Navigation() {
     <i className="fa-solid fa-sun"></i>
   );
   const [themeText, setThemeText] = useState("Светлая");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
   const barsRef = useRef(null);
   const location = useLocation();
@@ -22,6 +24,25 @@ export default function Navigation() {
       setMenuOpen(false);
     }
   };
+
+  const toggleForm = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.classList.add("no-scroll");
+    } else {
+      document.body.classList.remove("no-scroll");
+    }
+    return () => {
+      document.body.classList.remove("no-scroll");
+    };
+  }, [isModalOpen]);
 
   useEffect(() => {
     closeMenu();
@@ -84,6 +105,12 @@ export default function Navigation() {
         }
         ref={barsRef}
       />
+      <Button
+        onClick={toggleForm}
+        className={"form"}
+        text="Обратная связь"
+        icon={<i className="fa-solid fa-comment"></i>}
+      />
       <div ref={menuRef} className={`menu ${menuOpen ? "open" : ""}`}>
         <Button to="/" text="Главная" icon={<i className="fa fa-house"></i>} />
         <Button
@@ -103,7 +130,7 @@ export default function Navigation() {
         />
         <h4>Тема</h4>
         <Button text={themeText} onClick={switchTheme} icon={themeIcon} />
-        <h4>Ссылки</h4>
+        <h4>Контакты</h4>
         <div className="links">
           <Button
             href="https://t.me/TipTopTransfer"
@@ -115,8 +142,15 @@ export default function Navigation() {
             text="Евгений"
             icon={<i className="fa-brands fa-telegram"></i>}
           />
+          <Button
+            href="tel:+48739550824"
+            text="+48 739 550 824 Евгений"
+            icon={<i className="fa-solid fa-phone"></i>}
+          />
         </div>
       </div>
+
+      <FeedbackModal isOpen={isModalOpen} onClose={closeForm} />
     </nav>
   );
 }

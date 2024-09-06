@@ -112,10 +112,32 @@
   }
 
   .articles {
+    .filter {
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-color);
+      padding: 10px 0;
+      z-index: 9;
+
+      label {
+        font-size: medium;
+        margin-right: 10px;
+      }
+
+      select {
+        border: 2px solid var(--shadow-color);
+        border-radius: 8px;
+        font-size: medium;
+        padding: 5px;
+        color: var(--text-color);
+        background-color: var(--hover-color);
+      }
+    }
     .container {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      justify-content: center;
 
       .card {
         position: relative;
@@ -126,7 +148,7 @@
         border-radius: 8px;
         border: 2px solid var(--shadow-color);
         box-sizing: border-box;
-        flex: 0 0 calc(50% - 10px);
+        flex: 0 0 calc(50% - 5px);
         height: 350px;
         overflow: hidden;
 
@@ -138,11 +160,67 @@
           color: var(--accent-color);
         }
 
-        img {
-          height: 100%;
-          width: 100%;
+        .img {
           border-radius: 8px;
           filter: brightness(0.7);
+          overflow: hidden;
+
+          img {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            object-position: top;
+          }
+        }
+
+        .tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+
+          .tag {
+            padding: 5px;
+            border-radius: 50px;
+            font-size: small;
+            text-align: center;
+            border: 2px solid var(--shadow-color);
+            height: fit-content;
+
+            &.важное {
+              background-color: #ff6161;
+              color: white;
+            }
+
+            &.новости {
+              background-color: #00a4ff;
+              color: white;
+            }
+
+            &.граница {
+              background-color: #77ffab;
+              color: black;
+            }
+
+            &.трансферы {
+              background-color: #dddddd;
+              color: black;
+            }
+
+            &.посылки {
+              background-color: #ff7500;
+              color: white;
+            }
+
+            &.финансы {
+              background-color: #fdff00;
+              color: black;
+            }
+
+            &.животные {
+              background-color: #b300ff;
+              color: white;
+            }
+          }
         }
       }
     }
@@ -171,6 +249,8 @@
       background-color: var(--hover-color);
       border: 3px solid var(--shadow-color);
       border-radius: 10px;
+      display: grid;
+      gap: 20px;
 
       .close {
         position: fixed;
@@ -186,12 +266,17 @@
         align-items: center;
       }
 
+      a {
+        color: var(--accent-color);
+      }
+
       .gallery {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         overflow: scroll;
         width: 100%;
+        justify-content: center;
 
         .gallery-image {
           width: 100px;
