@@ -90,7 +90,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
               Отлично! Ваше сообщение отправлено. Теперь нужно только подождать,
               когда мы с вами свяжемся.
             </h3>
-            <img src="/assets/star-like.gif" alt="Thank you" />
+            <img src="/public/assets/star-like.gif" alt="Thank you" />
           </div>
         ) : (
           <form onSubmit={handleSubmit}>

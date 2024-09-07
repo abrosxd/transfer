@@ -3,8 +3,13 @@ import { useSettings } from "../../utils/Settings";
 import "./Currency.scss";
 
 function formatCurrency(value) {
-  const parsedValue = parseFloat(value);
-  return isNaN(parsedValue) ? "-" : parsedValue.toFixed(2);
+  return isNaN(value) ? "-" : value.toFixed(2);
+}
+
+async function fetchCentralBankData() {
+  const response = await fetch("https://www.cbr-xml-daily.ru/daily_json.js");
+  const data = await response.json();
+  return data;
 }
 
 const CurrencyCard = ({ buyPrice, sellPrice, icon, name }) => (
@@ -33,39 +38,114 @@ export default function Currency() {
   });
 
   const currencyMap = {
-    usd: "доллар",
-    eur: "евро",
-    pln: "польский злотый",
-    sek: "шведская крона",
+    USD: "доллар",
+    EUR: "евро",
+    PLN: "польский злотый",
+    SEK: "шведская крона",
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    };
+    return date.toLocaleDateString("ru-RU", options);
   };
 
   useEffect(() => {
     const loadCurrencyData = async () => {
       try {
+        const cbData = await fetchCentralBankData();
         const fetchedRecords = await fetchTableData(
           apiKey,
           baseId,
           tableCurrency
         );
-        const currencyData = fetchedRecords.reduce((acc, record) => {
+        const correctionData = fetchedRecords.reduce((acc, record) => {
           const currencyKey = record.Name.toLowerCase();
           acc[currencyKey] = {
-            buy: formatCurrency(record.Покупка),
-            sell: formatCurrency(record.Продажа),
+            buy: isNaN(parseFloat(record.Покупка))
+              ? "-"
+              : parseFloat(record.Покупка),
+            sell: isNaN(parseFloat(record.Продажа))
+              ? "-"
+              : parseFloat(record.Продажа),
           };
           return acc;
         }, {});
 
-        setCurrencyData((prevData) => ({
-          ...prevData,
-          usd: currencyData["доллар"] || { buy: null, sell: null },
-          eur: currencyData["евро"] || { buy: null, sell: null },
-          pln: currencyData["польский злотый"] || { buy: null, sell: null },
-          sek: currencyData["шведская крона"] || { buy: null, sell: null },
-          updateDate: new Date().toLocaleDateString(),
-        }));
+        const newCurrencyData = {
+          usd: {
+            buy:
+              correctionData["доллар"]?.buy === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.USD.Value + correctionData["доллар"]?.buy
+                  ),
+            sell:
+              correctionData["доллар"]?.sell === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.USD.Value + correctionData["доллар"]?.sell
+                  ),
+          },
+          eur: {
+            buy:
+              correctionData["евро"]?.buy === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.EUR.Value + correctionData["евро"]?.buy
+                  ),
+            sell:
+              correctionData["евро"]?.sell === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.EUR.Value + correctionData["евро"]?.sell
+                  ),
+          },
+          pln: {
+            buy:
+              correctionData["польский злотый"]?.buy === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.PLN?.Value / cbData.Valute.PLN?.Nominal +
+                      correctionData["польский злотый"]?.buy
+                  ),
+            sell:
+              correctionData["польский злотый"]?.sell === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.PLN?.Value / cbData.Valute.PLN?.Nominal +
+                      correctionData["польский злотый"]?.sell
+                  ),
+          },
+          sek: {
+            buy:
+              correctionData["шведская крона"]?.buy === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.SEK?.Value / cbData.Valute.SEK?.Nominal +
+                      correctionData["шведская крона"]?.buy
+                  ),
+            sell:
+              correctionData["шведская крона"]?.sell === "-"
+                ? "-"
+                : formatCurrency(
+                    cbData.Valute.SEK?.Value / cbData.Valute.SEK?.Nominal +
+                      correctionData["шведская крона"]?.sell
+                  ),
+          },
+          updateDate: formatDateTime(cbData.Date),
+        };
+
+        setCurrencyData(newCurrencyData);
       } catch (error) {
-        console.error("Ошибка при загрузке данных из Airtable:", error);
+        console.error("Ошибка при загрузке данных:", error);
       }
     };
 

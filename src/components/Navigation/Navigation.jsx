@@ -94,6 +94,12 @@ export default function Navigation() {
   return (
     <nav className="navigation">
       <Button
+        onClick={toggleForm}
+        className={"form"}
+        text="Обратная связь"
+        icon={<i className="fa-solid fa-comment"></i>}
+      />
+      <Button
         onClick={toggleMenu}
         className={"bars"}
         icon={
@@ -104,12 +110,6 @@ export default function Navigation() {
           )
         }
         ref={barsRef}
-      />
-      <Button
-        onClick={toggleForm}
-        className={"form"}
-        text="Обратная связь"
-        icon={<i className="fa-solid fa-comment"></i>}
       />
       <div ref={menuRef} className={`menu ${menuOpen ? "open" : ""}`}>
         <Button to="/" text="Главная" icon={<i className="fa fa-house"></i>} />
