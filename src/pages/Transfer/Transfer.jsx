@@ -74,7 +74,7 @@ export default function Transfer() {
   const { apiKey, baseId, tableTransfer, fetchTableData } = useSettings();
   const [transferData, setTransferData] = useState([]);
   const [cities, setCities] = useState([]);
-  const [filters, setFilters] = useState({ from: "", to: "", passengers: 1 });
+  const [filters, setFilters] = useState({ from: "", to: "", passengers: "" });
 
   // Получаем уникальный список городов из city1 и city2
   const getUniqueCities = (transfers) => {
@@ -204,6 +204,7 @@ export default function Transfer() {
                 value={filters.passengers}
                 onChange={handleFilterChange}
               >
+                <option value="">-</option>
                 {[...Array(8)].map((_, i) => (
                   <option key={i + 1} value={i + 1}>
                     {i + 1}
@@ -213,7 +214,7 @@ export default function Transfer() {
             </div>
           </div>
           <div className="container">
-            {filteredTransfers.length > 0 ? (
+            {filters.passengers && filteredTransfers.length > 0 ? (
               filteredTransfers.map((transfer, index) => (
                 <TransferCard
                   key={index}
