@@ -5,9 +5,9 @@ const SettingsContext = createContext();
 
 const settings = {
   apiKey:
-    "patZs0xLRQaVH0yJo.6b37088cccb3ce09e6abf49e350c39d5011e0e8f7cb478fa33d47eaa6667e8be",
+    "pateokblS4CsG7taE.3ce31722d7f0dba6b8deec493201d25f489d29c93568bd9ea7b49ab5b6a633c6",
   baseId: "appSNMO8drd0jsR3F",
-  webhook: "https://hook.eu2.make.com/4hrujnqf8nt252pm923igl9w8bv3dm0l",
+  webhook: "https://api.abros.dev/webhook/tiptoporder",
   tableArticles: "Articles",
   tableTransfer: "Transfer",
   tableReviews: "Reviews",

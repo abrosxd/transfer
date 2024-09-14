@@ -6,12 +6,6 @@ function formatCurrency(value) {
   return isNaN(value) ? "-" : value.toFixed(2);
 }
 
-async function fetchCentralBankData() {
-  const response = await fetch("https://www.cbr-xml-daily.ru/daily_json.js");
-  const data = await response.json();
-  return data;
-}
-
 const CurrencyCard = ({ buyPrice, sellPrice, icon, name }) => (
   <div className="card">
     <div className="grid">
@@ -34,116 +28,31 @@ export default function Currency() {
     eur: { buy: null, sell: null },
     pln: { buy: null, sell: null },
     sek: { buy: null, sell: null },
-    updateDate: null,
   });
-
-  const currencyMap = {
-    USD: "доллар",
-    EUR: "евро",
-    PLN: "польский злотый",
-    SEK: "шведская крона",
-  };
-
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    const options = {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-    };
-    return date.toLocaleDateString("ru-RU", options);
-  };
 
   useEffect(() => {
     const loadCurrencyData = async () => {
       try {
-        const cbData = await fetchCentralBankData();
         const fetchedRecords = await fetchTableData(
           apiKey,
           baseId,
           tableCurrency
         );
-        const correctionData = fetchedRecords.reduce((acc, record) => {
+        const newCurrencyData = fetchedRecords.reduce((acc, record) => {
           const currencyKey = record.Name.toLowerCase();
           acc[currencyKey] = {
-            buy: isNaN(parseFloat(record.Покупка))
-              ? "-"
-              : parseFloat(record.Покупка),
-            sell: isNaN(parseFloat(record.Продажа))
-              ? "-"
-              : parseFloat(record.Продажа),
+            buy: record.Покупка || "-",
+            sell: record.Продажа || "-",
           };
           return acc;
         }, {});
 
-        const newCurrencyData = {
-          usd: {
-            buy:
-              correctionData["доллар"]?.buy === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.USD.Value + correctionData["доллар"]?.buy
-                  ),
-            sell:
-              correctionData["доллар"]?.sell === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.USD.Value + correctionData["доллар"]?.sell
-                  ),
-          },
-          eur: {
-            buy:
-              correctionData["евро"]?.buy === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.EUR.Value + correctionData["евро"]?.buy
-                  ),
-            sell:
-              correctionData["евро"]?.sell === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.EUR.Value + correctionData["евро"]?.sell
-                  ),
-          },
-          pln: {
-            buy:
-              correctionData["польский злотый"]?.buy === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.PLN?.Value / cbData.Valute.PLN?.Nominal +
-                      correctionData["польский злотый"]?.buy
-                  ),
-            sell:
-              correctionData["польский злотый"]?.sell === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.PLN?.Value / cbData.Valute.PLN?.Nominal +
-                      correctionData["польский злотый"]?.sell
-                  ),
-          },
-          sek: {
-            buy:
-              correctionData["шведская крона"]?.buy === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.SEK?.Value / cbData.Valute.SEK?.Nominal +
-                      correctionData["шведская крона"]?.buy
-                  ),
-            sell:
-              correctionData["шведская крона"]?.sell === "-"
-                ? "-"
-                : formatCurrency(
-                    cbData.Valute.SEK?.Value / cbData.Valute.SEK?.Nominal +
-                      correctionData["шведская крона"]?.sell
-                  ),
-          },
-          updateDate: formatDateTime(cbData.Date),
-        };
-
-        setCurrencyData(newCurrencyData);
+        setCurrencyData({
+          usd: newCurrencyData["доллар"] || { buy: "-", sell: "-" },
+          eur: newCurrencyData["евро"] || { buy: "-", sell: "-" },
+          pln: newCurrencyData["польский злотый"] || { buy: "-", sell: "-" },
+          sek: newCurrencyData["шведская крона"] || { buy: "-", sell: "-" },
+        });
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
       }
@@ -157,24 +66,18 @@ export default function Currency() {
       <div className="status">
         <h1>Валюты</h1>
         <div className="items">
-          <h3 className="date">
-            курс на{" "}
-            <span className="date-vault">
-              {currencyData.updateDate || "**.**.****"}
-            </span>
-          </h3>
           <div className="container">
-            <CurrencyCard
-              buyPrice={currencyData.usd.buy}
-              sellPrice={currencyData.usd.sell}
-              name="Доллар"
-              icon={<i className="bx bx-dollar"></i>}
-            />
             <CurrencyCard
               buyPrice={currencyData.eur.buy}
               sellPrice={currencyData.eur.sell}
               name="Евро"
               icon={<i className="bx bx-euro"></i>}
+            />
+            <CurrencyCard
+              buyPrice={currencyData.usd.buy}
+              sellPrice={currencyData.usd.sell}
+              name="Доллар"
+              icon={<i className="bx bx-dollar"></i>}
             />
             <CurrencyCard
               buyPrice={currencyData.pln.buy}

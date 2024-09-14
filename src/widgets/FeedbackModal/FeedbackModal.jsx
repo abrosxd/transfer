@@ -25,17 +25,16 @@ export default function FeedbackModal({ isOpen, onClose }) {
       email,
       phone,
       socialLink,
-      interests,
+      interests: interests.join(","),
       message,
     };
 
+    const queryParams = new URLSearchParams(formData).toString();
+    const requestUrl = `${webhook}?${queryParams}`;
+
     try {
-      const response = await fetch(webhook, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const response = await fetch(requestUrl, {
+        method: "GET",
       });
 
       if (response.ok) {
