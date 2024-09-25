@@ -7,6 +7,7 @@ import L from "leaflet";
 import axios from "axios";
 import Select from "react-select";
 import debounce from "lodash.debounce";
+import Button from "../../partials/Button/Button";
 
 export default function Transfer() {
   const { apiKey, baseId, tableTransfer, fetchTableData } = useSettings();
@@ -61,15 +62,24 @@ export default function Transfer() {
           `https://router.project-osrm.org/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`
         );
 
-        if (response.data.routes.length > 0) {
+        if (
+          response.data &&
+          response.data.routes &&
+          response.data.routes.length > 0
+        ) {
           const route = response.data.routes[0];
           const routeDistance = Math.round(route.distance / 1000);
           setDistance(routeDistance);
+
           const formattedDuration = formatDuration(route.duration);
           setDuration(formattedDuration);
+
           const calculatedPrice = calculatePrice(routeDistance);
           setPrice(calculatedPrice.toFixed(2));
+
           setRouteData(route.geometry);
+        } else {
+          console.error("Ошибка: ответ не содержит данных о маршруте.");
         }
       }
     } catch (error) {
@@ -82,12 +92,6 @@ export default function Transfer() {
     const minutes = Math.round((durationInSeconds % 3600) / 60);
     return `${hours} ч ${minutes} мин`;
   };
-
-  useEffect(() => {
-    if (startLocation && endLocation) {
-      fetchRouteData();
-    }
-  }, [startLocation, endLocation]);
 
   const searchAddress = useCallback(
     debounce(async (query, setOptions) => {
@@ -255,32 +259,40 @@ export default function Transfer() {
     <main className="transfer">
       <h1>Трансферы</h1>
       <div className="data">
-        <div className="input-container">
-          <label>Откуда:</label>
-          <Select
-            value={startLocation}
-            onChange={handleStartChange}
-            onInputChange={handleStartInputChange}
-            options={startOptions}
-            placeholder="Введите адрес"
-            isClearable
-            filterOption={customFilterOption}
-            styles={customStyles}
-          />
+        <div className="section">
+          <div className="input-container">
+            <label>Откуда:</label>
+            <Select
+              value={startLocation}
+              onChange={handleStartChange}
+              onInputChange={handleStartInputChange}
+              options={startOptions}
+              placeholder="Введите адрес"
+              isClearable
+              filterOption={customFilterOption}
+              styles={customStyles}
+            />
+          </div>
+          <div className="input-container">
+            <label>Куда:</label>
+            <Select
+              value={endLocation}
+              onChange={handleEndChange}
+              onInputChange={handleEndInputChange}
+              options={endOptions}
+              placeholder="Введите адрес"
+              isClearable
+              filterOption={customFilterOption}
+              styles={customStyles}
+            />
+          </div>
         </div>
-        <div className="input-container">
-          <label>Куда:</label>
-          <Select
-            value={endLocation}
-            onChange={handleEndChange}
-            onInputChange={handleEndInputChange}
-            options={endOptions}
-            placeholder="Введите адрес"
-            isClearable
-            filterOption={customFilterOption}
-            styles={customStyles}
-          />
-        </div>
+        <Button
+          onClick={fetchRouteData}
+          className={"calc"}
+          text="Рассчитать"
+          icon={<i className="fa-solid fa-route"></i>}
+        />
       </div>
       <div className="map-container">
         {distance > 0 && (

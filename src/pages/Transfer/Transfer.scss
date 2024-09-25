@@ -7,11 +7,26 @@
   }
 
   .data {
-    display: flex;
+    display: grid;
     gap: 10px;
 
-    .input-container {
-      width: 100%;
+    .section {
+      display: flex;
+      gap: 10px;
+
+      .input-container {
+        width: 100%;
+      }
+    }
+
+    .calc {
+      border-radius: 50px;
+      padding: 15px;
+      background-color: var(--accent-color);
+      color: #fff;
+      box-shadow: 0 0 10px var(--shadow-color);
+      width: fit-content;
+      margin: 0 auto;
     }
   }
 
