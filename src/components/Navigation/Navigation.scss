@@ -17,10 +17,7 @@
     background-color: var(--accent-color);
     color: white;
     box-shadow: 0 0 10px var(--shadow-color);
-
-    &:hover {
-      background-color: var(--accent-color);
-    }
+    font-size: medium;
   }
 
   .bars {
