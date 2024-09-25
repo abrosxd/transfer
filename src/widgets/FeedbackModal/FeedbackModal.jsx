@@ -4,53 +4,42 @@ import "./FeedbackModal.scss";
 
 export default function FeedbackModal({ isOpen, onClose }) {
   const { webhook } = useSettings();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [socialLink, setSocialLink] = useState("");
-  const [message, setMessage] = useState("");
+  const initialFormState = {
+    name: "",
+    email: "",
+    phone: "",
+    socialLink: "",
+    message: "",
+    interests: [],
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [interests, setInterests] = useState([]);
+
+  const isFormValid = () => {
+    const { name, email, phone, socialLink, interests } = formData;
+    return name && email && phone && socialLink && interests.length > 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !phone || !socialLink || interests.length === 0) {
+    if (!isFormValid()) {
       alert("Пожалуйста, заполните все обязательные поля.");
       return;
     }
 
-    const formData = {
-      name,
-      email,
-      phone,
-      socialLink,
-      interests: interests.join(","),
-      message,
-    };
-
-    const queryParams = new URLSearchParams(formData).toString();
-    const requestUrl = `${webhook}?${queryParams}`;
-
     try {
-      const response = await fetch(requestUrl, {
-        method: "GET",
+      const response = await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         setIsSubmitted(true);
-        setName("");
-        setEmail("");
-        setPhone("");
-        setSocialLink("");
-        setMessage("");
-        setInterests([]);
-
-        setTimeout(() => {
-          if (isOpen) {
-            onClose();
-          }
-        }, 5000);
+        setFormData(initialFormState);
+        setTimeout(onClose, 5000);
       } else {
         console.error("Ошибка при отправке данных на Webhook");
       }
@@ -59,22 +48,26 @@ export default function FeedbackModal({ isOpen, onClose }) {
     }
   };
 
-  const handleCheckboxChange = (e) => {
-    const value = e.target.value;
-    setInterests((prevInterests) =>
-      prevInterests.includes(value)
-        ? prevInterests.filter((interest) => interest !== value)
-        : [...prevInterests, value]
-    );
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]:
+        type === "checkbox"
+          ? checked
+            ? [...prevData.interests, value]
+            : prevData.interests.filter((interest) => interest !== value)
+          : value,
+    }));
   };
 
   useEffect(() => {
-    if (!isOpen) {
-      setIsSubmitted(false);
-    }
+    if (!isOpen) setIsSubmitted(false);
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const { name, email, phone, socialLink, message, interests } = formData;
 
   return (
     <div className="feedback-overlay">
@@ -98,8 +91,9 @@ export default function FeedbackModal({ isOpen, onClose }) {
               <input
                 type="text"
                 id="name"
+                name="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -108,8 +102,9 @@ export default function FeedbackModal({ isOpen, onClose }) {
               <input
                 type="email"
                 id="email"
+                name="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -118,8 +113,9 @@ export default function FeedbackModal({ isOpen, onClose }) {
               <input
                 type="text"
                 id="phone"
+                name="phone"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -128,54 +124,40 @@ export default function FeedbackModal({ isOpen, onClose }) {
               <input
                 type="text"
                 id="socialLink"
+                name="socialLink"
                 value={socialLink}
-                onChange={(e) => setSocialLink(e.target.value)}
+                onChange={handleChange}
                 required
               />
             </div>
             <div className="form-group">
               <label>Вас интересует:</label>
               <div className="interests">
-                <label
-                  className={interests.includes("Трансфер") ? "active" : ""}
-                >
-                  <input
-                    type="checkbox"
-                    value="Трансфер"
-                    checked={interests.includes("Трансфер")}
-                    onChange={handleCheckboxChange}
-                    required={interests.length === 0}
-                  />
-                  Трансфер
-                </label>
-                <label
-                  className={interests.includes("Посылки") ? "active" : ""}
-                >
-                  <input
-                    type="checkbox"
-                    value="Посылки"
-                    checked={interests.includes("Посылки")}
-                    onChange={handleCheckboxChange}
-                  />
-                  Посылки
-                </label>
-                <label className={interests.includes("Обмен") ? "active" : ""}>
-                  <input
-                    type="checkbox"
-                    value="Обмен"
-                    checked={interests.includes("Обмен")}
-                    onChange={handleCheckboxChange}
-                  />
-                  Обмен валюты
-                </label>
+                {["Трансфер", "Посылки", "Обмен"].map((interest) => (
+                  <label
+                    key={interest}
+                    className={interests.includes(interest) ? "active" : ""}
+                  >
+                    <input
+                      type="checkbox"
+                      value={interest}
+                      name="interests"
+                      checked={interests.includes(interest)}
+                      onChange={handleChange}
+                      required={interests.length === 0}
+                    />
+                    {interest}
+                  </label>
+                ))}
               </div>
             </div>
             <div className="form-group">
               <label htmlFor="message">Сообщение:</label>
               <textarea
                 id="message"
+                name="message"
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={handleChange}
               ></textarea>
             </div>
             <button type="submit" className="submit-button">

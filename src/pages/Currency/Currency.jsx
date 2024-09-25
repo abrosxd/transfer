@@ -28,6 +28,7 @@ export default function Currency() {
     eur: { buy: null, sell: null },
     pln: { buy: null, sell: null },
     sek: { buy: null, sell: null },
+    gbp: { buy: null, sell: null },
   });
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function Currency() {
           eur: newCurrencyData["евро"] || { buy: "-", sell: "-" },
           pln: newCurrencyData["польский злотый"] || { buy: "-", sell: "-" },
           sek: newCurrencyData["шведская крона"] || { buy: "-", sell: "-" },
+          gbp: newCurrencyData["фунт стерлингов"] || { buy: "-", sell: "-" },
         });
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
@@ -99,6 +101,12 @@ export default function Currency() {
                   <path d="M18,58.35l8.19-10.46L45.45,27H66.63L39.32,56.82l29,39H46.63L26.82,67.89l-8.06,6.47V95.78H0V0H18.76V42.72l-1,15.63Zm98.52-32.64a31,31,0,0,1,6.34.55l-1.41,17.6a22,22,0,0,0-5.54-.61q-9,0-14,4.62t-5,12.92v35H78.16V27H92.38l2.75,11.59h.93a26.15,26.15,0,0,1,8.65-9.32,21.27,21.27,0,0,1,11.83-3.53Z" />
                 </svg>
               }
+            />
+            <CurrencyCard
+              buyPrice={currencyData.gbp.buy}
+              sellPrice={currencyData.gbp.sell}
+              name="Фунт стерлингов"
+              icon={<i className="bx bx-pound"></i>}
             />
           </div>
         </div>

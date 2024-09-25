@@ -1,92 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSettings } from "../../utils/Settings";
 import "./Transfer.scss";
-
-// Функция для обработки переносов строк
-const formatTextWithLineBreaks = (text) => {
-  return text.split("\n").map((str, index) => (
-    <React.Fragment key={index}>
-      {str}
-      <br />
-    </React.Fragment>
-  ));
-};
-
-const formatTextAsList = (text) => {
-  return (
-    <ul>
-      {text.split("\n").map((str, index) => (
-        <li key={index}>{str}</li>
-      ))}
-    </ul>
-  );
-};
-
-const TransferCard = ({
-  city1,
-  city2,
-  price,
-  timing,
-  configuration,
-  description,
-}) => (
-  <div className="card">
-    <h3>
-      {city1} - {city2}
-    </h3>
-    <div className="grid">
-      {price && (
-        <div className="price">
-          <h5>💰 Стоимость:</h5>
-          <h5>{formatTextWithLineBreaks(price)}</h5>
-        </div>
-      )}
-      {timing && (
-        <div className="timing">
-          <h5>⌚ Время в пути:</h5>
-          <h5>{timing}</h5>
-        </div>
-      )}
-      {configuration && (
-        <div className="configuration">
-          <h5>📋 Конфигурация:</h5>
-          {formatTextAsList(configuration)}
-        </div>
-      )}
-      {description && (
-        <div className="description">
-          <h5>📝 Примечания:</h5>
-          <h5>{formatTextWithLineBreaks(description)}</h5>
-        </div>
-      )}
-      <div className="info">
-        <h6>
-          Заказать и обсудить детали трансфера можно нажав по кнопке "Обратная
-          связь" и заполнив форму обратной связи или по контактам находящимся в
-          меню сайта.
-        </h6>
-      </div>
-    </div>
-  </div>
-);
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import axios from "axios";
+import Select from "react-select";
+import debounce from "lodash.debounce";
 
 export default function Transfer() {
   const { apiKey, baseId, tableTransfer, fetchTableData } = useSettings();
   const [transferData, setTransferData] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [filters, setFilters] = useState({ from: "", to: "", passengers: "" });
-
-  // Получаем уникальный список городов из city1 и city2
-  const getUniqueCities = (transfers) => {
-    const citySet = new Set();
-
-    transfers.forEach((record) => {
-      if (record.city1) citySet.add(record.city1);
-      if (record.city2) citySet.add(record.city2);
-    });
-
-    return Array.from(citySet);
-  };
+  const [startLocation, setStartLocation] = useState(null);
+  const [endLocation, setEndLocation] = useState(null);
+  const [routeData, setRouteData] = useState(null);
+  const [distance, setDistance] = useState(0);
+  const [duration, setDuration] = useState("");
+  const [price, setPrice] = useState(0);
+  const [startOptions, setStartOptions] = useState([]);
+  const [endOptions, setEndOptions] = useState([]);
+  const polylineRef = useRef(null);
 
   useEffect(() => {
     const loadTransfer = async () => {
@@ -96,143 +29,299 @@ export default function Transfer() {
           baseId,
           tableTransfer
         );
-
-        console.log("Данные из Airtable:", fetchedTransfer);
-
         const transferData = fetchedTransfer.map((record) => ({
-          city1: record.Город1 || "",
-          city2: record.Город2 || "",
-          priceSedan: record.СтоимостьСедан || "",
-          priceBus: record.СтоимостьБус || "",
-          timing: record.ВремяПути || "",
           configuration: record.Конфигурация || "",
           description: record.Примечания || "",
         }));
-
         setTransferData(transferData);
-
-        // Получаем уникальные города для фильтров
-        const uniqueCities = getUniqueCities(transferData);
-        setCities(uniqueCities);
       } catch (error) {
         console.error("Ошибка при загрузке данных из Airtable:", error);
       }
     };
-
     loadTransfer();
   }, [apiKey, baseId, tableTransfer, fetchTableData]);
 
-  // Функция для изменения фильтров
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }));
+  const calculatePrice = (distance) => {
+    if (distance <= 500) {
+      return distance * 1.1;
+    } else if (distance > 500 && distance <= 1000) {
+      return distance * 1.2;
+    } else {
+      return distance * 1.3;
+    }
   };
 
-  // Фильтруем данные на основе выбранных городов и количества пассажиров
-  const filteredTransfers = transferData.filter((transfer) => {
-    const isFromMatch = filters.from
-      ? transfer.city1 === filters.from || transfer.city2 === filters.from
-      : false;
-    const isToMatch = filters.to
-      ? transfer.city1 === filters.to || transfer.city2 === filters.to
-      : false;
-    const hasPrice =
-      (filters.passengers >= 1 &&
-        filters.passengers <= 3 &&
-        transfer.priceSedan) ||
-      (filters.passengers >= 4 && filters.passengers <= 8 && transfer.priceBus);
-    return isFromMatch && isToMatch && hasPrice;
-  });
+  const fetchRouteData = async () => {
+    try {
+      if (startLocation && endLocation) {
+        const startCoords = startLocation.value;
+        const endCoords = endLocation.value;
 
-  // Определяем цену в зависимости от количества пассажиров
-  const getPrice = (transfer) => {
-    const passengers = Number(filters.passengers);
-    if (passengers >= 1 && passengers <= 3) {
-      return transfer.priceSedan;
-    } else if (passengers >= 4 && passengers <= 8) {
-      return transfer.priceBus;
+        const response = await axios.get(
+          `https://router.project-osrm.org/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`
+        );
+
+        if (response.data.routes.length > 0) {
+          const route = response.data.routes[0];
+          const routeDistance = Math.round(route.distance / 1000);
+          setDistance(routeDistance);
+          const formattedDuration = formatDuration(route.duration);
+          setDuration(formattedDuration);
+          const calculatedPrice = calculatePrice(routeDistance);
+          setPrice(calculatedPrice.toFixed(2));
+          setRouteData(route.geometry);
+        }
+      }
+    } catch (error) {
+      console.error("Ошибка при получении данных маршрута:", error);
+    }
+  };
+
+  const formatDuration = (durationInSeconds) => {
+    const hours = Math.floor(durationInSeconds / 3600);
+    const minutes = Math.round((durationInSeconds % 3600) / 60);
+    return `${hours} ч ${minutes} мин`;
+  };
+
+  useEffect(() => {
+    if (startLocation && endLocation) {
+      fetchRouteData();
+    }
+  }, [startLocation, endLocation]);
+
+  const searchAddress = useCallback(
+    debounce(async (query, setOptions) => {
+      if (query) {
+        try {
+          const response = await axios.get(
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${query}&limit=5`
+          );
+          const options = response.data.map((result) => ({
+            label: formatAddress(result),
+            value: {
+              lat: parseFloat(result.lat),
+              lng: parseFloat(result.lon),
+              display_name: result.display_name,
+            },
+          }));
+          setOptions(options);
+        } catch (error) {
+          console.error("Ошибка при поиске адреса:", error);
+        }
+      } else {
+        setOptions([]);
+      }
+    }, 300),
+    []
+  );
+
+  const formatAddress = (result) => {
+    const { house_number, road, city, town, village, country } =
+      result.address || {};
+    return [house_number, road, city || town || village, country]
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  const handleStartInputChange = (value) => {
+    if (typeof value === "string") {
+      searchAddress(value, setStartOptions);
+    }
+  };
+
+  const handleEndInputChange = (value) => {
+    if (typeof value === "string") {
+      searchAddress(value, setEndOptions);
+    }
+  };
+
+  const handleStartChange = (selectedOption) => {
+    setStartLocation(validateOption(selectedOption));
+  };
+
+  const handleEndChange = (selectedOption) => {
+    setEndLocation(validateOption(selectedOption));
+  };
+
+  const validateOption = (option) => {
+    if (
+      option &&
+      typeof option.label === "string" &&
+      typeof option.value === "object" &&
+      typeof option.value.lat === "number" &&
+      typeof option.value.lng === "number"
+    ) {
+      return option;
     }
     return null;
   };
 
+  const customFilterOption = (option, rawInput) => {
+    if (!option.label || typeof option.label !== "string") {
+      return false;
+    }
+    if (!rawInput || typeof rawInput !== "string") {
+      return false;
+    }
+    return option.label.toLowerCase().includes(rawInput.toLowerCase());
+  };
+
+  const RoutePolyline = ({ route }) => {
+    const map = useMap();
+
+    useEffect(() => {
+      if (polylineRef.current) {
+        map.removeLayer(polylineRef.current);
+      }
+
+      if (route) {
+        const polyline = L.polyline(
+          route.coordinates.map((c) => [c[1], c[0]]),
+          { color: "blue" }
+        );
+        polyline.addTo(map);
+        polylineRef.current = polyline;
+        map.fitBounds(polyline.getBounds());
+      }
+    }, [route, map]);
+
+    return null;
+  };
+
+  const formatTextWithLinks = (text) => {
+    const urlRegex = /((https?:\/\/[^\s]+))/g;
+    const phoneRegex = /(\+?\d[\d\s-]{9,})/g;
+
+    return text.split(/(\s+)/).map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+            {part}
+          </a>
+        );
+      } else if (phoneRegex.test(part)) {
+        return (
+          <a key={index} href={`tel:${part.replace(/\s+/g, "")}`}>
+            {part}
+          </a>
+        );
+      } else {
+        return part;
+      }
+    });
+  };
+
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--hover-color)",
+      color: "var(--text-color)",
+      borderColor: "var(--shadow-color)",
+      "&:hover": {
+        borderColor: "var(--shadow-color)",
+      },
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "var(--text-color)",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "var(--text-color)",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused
+        ? "var(--hover-color)"
+        : "var(--hover-color)",
+      color: "var(--text-color)",
+      "&:hover": {
+        backgroundColor: "var(--shadow-color)",
+        color: "var(--text-color)",
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      color: "var(--text-color)",
+      backgroundColor: "var(--bg-color)",
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "var(--text-color)",
+    }),
+  };
+
   return (
     <main className="transfer">
-      <div className="status">
-        <h1>Трансферы</h1>
-        <div className="items">
-          <div className="search">
-            <div className="filter from">
-              <label htmlFor="fromFilter">Откуда</label>
-              <select
-                id="fromFilter"
-                name="from"
-                value={filters.from}
-                onChange={handleFilterChange}
-              >
-                <option value="">Выберите город</option>
-                {cities.map((city, index) => (
-                  <option key={index} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="filter to">
-              <label htmlFor="toFilter">Куда</label>
-              <select
-                id="toFilter"
-                name="to"
-                value={filters.to}
-                onChange={handleFilterChange}
-              >
-                <option value="">Выберите город</option>
-                {cities.map((city, index) => (
-                  <option key={index} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="filter passengers">
-              <label htmlFor="passengersFilter">Количество пассажиров</label>
-              <select
-                id="passengersFilter"
-                name="passengers"
-                value={filters.passengers}
-                onChange={handleFilterChange}
-              >
-                <option value="">-</option>
-                {[...Array(8)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="container">
-            {filters.passengers && filteredTransfers.length > 0 ? (
-              filteredTransfers.map((transfer, index) => (
-                <TransferCard
-                  key={index}
-                  city1={transfer.city1}
-                  city2={transfer.city2}
-                  price={getPrice(transfer)}
-                  timing={transfer.timing}
-                  configuration={transfer.configuration}
-                  description={transfer.description}
-                />
-              ))
-            ) : (
-              <h3 className="none">
-                Выберите фильтры для отображения трансферов
-              </h3>
-            )}
-          </div>
+      <h1>Трансферы</h1>
+      <div className="data">
+        <div className="input-container">
+          <label>Откуда:</label>
+          <Select
+            value={startLocation}
+            onChange={handleStartChange}
+            onInputChange={handleStartInputChange}
+            options={startOptions}
+            placeholder="Введите адрес"
+            isClearable
+            filterOption={customFilterOption}
+            styles={customStyles}
+          />
         </div>
+        <div className="input-container">
+          <label>Куда:</label>
+          <Select
+            value={endLocation}
+            onChange={handleEndChange}
+            onInputChange={handleEndInputChange}
+            options={endOptions}
+            placeholder="Введите адрес"
+            isClearable
+            filterOption={customFilterOption}
+            styles={customStyles}
+          />
+        </div>
+      </div>
+      <div className="map-container">
+        {distance > 0 && (
+          <div className="route-info">
+            <p>Расстояние: {distance} км</p>
+            <p>Время в пути: ≈{duration}</p>
+            <p>Цена: ≈{price} €</p>
+          </div>
+        )}
+        <MapContainer center={[51.505, -0.09]} zoom={13} className="map">
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {routeData && <RoutePolyline route={routeData} />}
+        </MapContainer>
+      </div>
+      <div className="transfer-details">
+        <h2>Детали трансфера</h2>
+        {transferData.map((item, index) => (
+          <div key={index} className="transfer-item">
+            <p>
+              <strong>Конфигурация:</strong> <br />
+              {item.configuration.split("\n").map((line, i) => (
+                <span key={i}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+            </p>
+            <p>
+              <strong>Примечания:</strong> <br />
+              {item.description.split("\n").map((line, i) => (
+                <span key={i}>
+                  {formatTextWithLinks(line)}
+                  <br />
+                </span>
+              ))}
+            </p>
+          </div>
+        ))}
       </div>
       <div className="sticker">
         <img src="/assets/all-transfer.gif" alt="Transfer" />
