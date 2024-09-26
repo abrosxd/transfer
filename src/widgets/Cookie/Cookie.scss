@@ -1,0 +1,24 @@
+.cookie {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 999999;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 15px;
+  border-radius: 20px;
+  font-size: large;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+
+  .cookie-set {
+    width: fit-content;
+    margin: 0 auto;
+    border: 2px solid white;
+    background-color: var(--hover-color);
+    color: white;
+    border-radius: 10px;
+  }
+}

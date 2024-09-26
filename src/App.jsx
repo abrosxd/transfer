@@ -4,6 +4,7 @@ import "./App.scss";
 
 import Navigation from "./components/Navigation/Navigation";
 import Footer from "./components/Footer/Footer";
+import Cookie from "./widgets/Cookie/Cookie";
 
 import Home from "./pages/Home/Home";
 import Transfer from "./pages/Transfer/Transfer";
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      <Cookie />
     </>
   );
 }
