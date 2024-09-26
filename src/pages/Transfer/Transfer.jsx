@@ -10,7 +10,7 @@ import debounce from "lodash.debounce";
 import Button from "../../partials/Button/Button";
 
 export default function Transfer() {
-  const { apiKey, baseId, tableTransfer, fetchTableData } = useSettings();
+  const { airtableKey, baseId, tableTransfer, fetchTableData } = useSettings();
   const [transferData, setTransferData] = useState([]);
   const [startLocation, setStartLocation] = useState(null);
   const [endLocation, setEndLocation] = useState(null);
@@ -29,7 +29,7 @@ export default function Transfer() {
     const loadTransfer = async () => {
       try {
         const fetchedTransfer = await fetchTableData(
-          apiKey,
+          airtableKey,
           baseId,
           tableTransfer
         );
@@ -43,7 +43,7 @@ export default function Transfer() {
       }
     };
     loadTransfer();
-  }, [apiKey, baseId, tableTransfer, fetchTableData]);
+  }, [airtableKey, baseId, tableTransfer, fetchTableData]);
 
   const calculatePrice = (distance) => {
     if (distance <= 500) {

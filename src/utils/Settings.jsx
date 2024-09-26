@@ -4,7 +4,7 @@ import Airtable from "airtable";
 const SettingsContext = createContext();
 
 const settings = {
-  apiKey:
+  airtableKey:
     "pateokblS4CsG7taE.3ce31722d7f0dba6b8deec493201d25f489d29c93568bd9ea7b49ab5b6a633c6",
   baseId: "appSNMO8drd0jsR3F",
   webhook: "https://api.abros.dev/webhook/tiptoporder",

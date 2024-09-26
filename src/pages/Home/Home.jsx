@@ -30,13 +30,11 @@ const Modal = ({ article, onClose }) => {
     };
   }, []);
 
-  // Функция для обработки текста и превращения телефонов, ссылок и переносов строки в HTML
   const processText = (text) => {
     const linkRegex = /(https?:\/\/[^\s]+)/g;
     const phoneRegex =
       /(\+?[0-9]{1,4}[-\s]?[0-9]{2,4}[-\s]?[0-9]{2,4}[-\s]?[0-9]{2,4})/g;
 
-    // Замена ссылок, телефонов и переносов строки
     const processedText = text
       .replace(linkRegex, '<a href="$1" target="_blank">$1</a>')
       .replace(phoneRegex, '<a href="tel:$1">$1</a>')
@@ -115,19 +113,19 @@ const ArticleCard = ({ title, cover, tags, onClick }) => (
 );
 
 export default function Home() {
-  const { apiKey, baseId, tableArticles, tableReviews, fetchTableData } =
+  const { airtableKey, baseId, tableArticles, tableReviews, fetchTableData } =
     useSettings();
 
   const [articles, setArticles] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
-  const [selectedTag, setSelectedTag] = useState("Все"); // Состояние для выбранного тега
+  const [selectedTag, setSelectedTag] = useState("Все");
 
   useEffect(() => {
     const loadReviews = async () => {
       try {
         const fetchedReviews = await fetchTableData(
-          apiKey,
+          airtableKey,
           baseId,
           tableReviews
         );
@@ -145,7 +143,7 @@ export default function Home() {
     const loadArticles = async () => {
       try {
         const fetchedArticles = await fetchTableData(
-          apiKey,
+          airtableKey,
           baseId,
           tableArticles
         );
@@ -164,7 +162,7 @@ export default function Home() {
       }
     };
     loadArticles();
-  }, [apiKey, baseId, tableArticles, tableReviews, fetchTableData]);
+  }, [airtableKey, baseId, tableArticles, tableReviews, fetchTableData]);
 
   const handleCardClick = (article) => {
     setSelectedArticle(article);
@@ -174,7 +172,6 @@ export default function Home() {
     setSelectedArticle(null);
   };
 
-  // Фильтрация статей по тегу
   const filteredArticles =
     selectedTag === "Все"
       ? articles

@@ -22,7 +22,7 @@ const CurrencyCard = ({ buyPrice, sellPrice, icon, name }) => (
 );
 
 export default function Currency() {
-  const { apiKey, baseId, tableCurrency, fetchTableData } = useSettings();
+  const { airtableKey, baseId, tableCurrency, fetchTableData } = useSettings();
   const [currencyData, setCurrencyData] = useState({
     usd: { buy: null, sell: null },
     eur: { buy: null, sell: null },
@@ -35,7 +35,7 @@ export default function Currency() {
     const loadCurrencyData = async () => {
       try {
         const fetchedRecords = await fetchTableData(
-          apiKey,
+          airtableKey,
           baseId,
           tableCurrency
         );
@@ -61,7 +61,7 @@ export default function Currency() {
     };
 
     loadCurrencyData();
-  }, [apiKey, baseId, tableCurrency, fetchTableData]);
+  }, [airtableKey, baseId, tableCurrency, fetchTableData]);
 
   return (
     <main className="currency">
