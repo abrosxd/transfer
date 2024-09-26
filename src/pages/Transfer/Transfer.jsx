@@ -22,6 +22,9 @@ export default function Transfer() {
   const [endOptions, setEndOptions] = useState([]);
   const polylineRef = useRef(null);
 
+  const ORS_API_KEY =
+    "5b3ce3597851110001cf624834bbaaf7a2704a3c96c29240a35d5f9c";
+
   useEffect(() => {
     const loadTransfer = async () => {
       try {
@@ -59,19 +62,28 @@ export default function Transfer() {
         const endCoords = endLocation.value;
 
         const response = await axios.get(
-          `https://router.project-osrm.org/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`
+          `https://api.openrouteservice.org/v2/directions/driving-car?start=${startCoords.lng},${startCoords.lat}&end=${endCoords.lng},${endCoords.lat}`,
+          {
+            headers: {
+              Authorization: `Bearer ${ORS_API_KEY}`,
+            },
+          }
         );
 
         if (
           response.data &&
-          response.data.routes &&
-          response.data.routes.length > 0
+          response.data.features &&
+          response.data.features.length > 0
         ) {
-          const route = response.data.routes[0];
-          const routeDistance = Math.round(route.distance / 1000);
+          const route = response.data.features[0];
+          const routeDistance = Math.round(
+            route.properties.segments[0].distance / 1000
+          );
           setDistance(routeDistance);
 
-          const formattedDuration = formatDuration(route.duration);
+          const formattedDuration = formatDuration(
+            route.properties.segments[0].duration
+          );
           setDuration(formattedDuration);
 
           const calculatedPrice = calculatePrice(routeDistance);
@@ -101,11 +113,10 @@ export default function Transfer() {
             `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${query}&limit=5`
           );
           const options = response.data.map((result) => ({
-            label: formatAddress(result),
+            label: result.display_name,
             value: {
               lat: parseFloat(result.lat),
               lng: parseFloat(result.lon),
-              display_name: result.display_name,
             },
           }));
           setOptions(options);
@@ -118,14 +129,6 @@ export default function Transfer() {
     }, 300),
     []
   );
-
-  const formatAddress = (result) => {
-    const { house_number, road, city, town, village, country } =
-      result.address || {};
-    return [house_number, road, city || town || village, country]
-      .filter(Boolean)
-      .join(", ");
-  };
 
   const handleStartInputChange = (value) => {
     if (typeof value === "string") {
@@ -140,34 +143,11 @@ export default function Transfer() {
   };
 
   const handleStartChange = (selectedOption) => {
-    setStartLocation(validateOption(selectedOption));
+    setStartLocation(selectedOption);
   };
 
   const handleEndChange = (selectedOption) => {
-    setEndLocation(validateOption(selectedOption));
-  };
-
-  const validateOption = (option) => {
-    if (
-      option &&
-      typeof option.label === "string" &&
-      typeof option.value === "object" &&
-      typeof option.value.lat === "number" &&
-      typeof option.value.lng === "number"
-    ) {
-      return option;
-    }
-    return null;
-  };
-
-  const customFilterOption = (option, rawInput) => {
-    if (!option.label || typeof option.label !== "string") {
-      return false;
-    }
-    if (!rawInput || typeof rawInput !== "string") {
-      return false;
-    }
-    return option.label.toLowerCase().includes(rawInput.toLowerCase());
+    setEndLocation(selectedOption);
   };
 
   const RoutePolyline = ({ route }) => {
@@ -269,8 +249,9 @@ export default function Transfer() {
               options={startOptions}
               placeholder="Введите адрес"
               isClearable
-              filterOption={customFilterOption}
               styles={customStyles}
+              noOptionsMessage={() => "Нет опций"}
+              filterOption={() => true}
             />
           </div>
           <div className="input-container">
@@ -282,8 +263,9 @@ export default function Transfer() {
               options={endOptions}
               placeholder="Введите адрес"
               isClearable
-              filterOption={customFilterOption}
               styles={customStyles}
+              noOptionsMessage={() => "Нет опций"}
+              filterOption={() => true}
             />
           </div>
         </div>
